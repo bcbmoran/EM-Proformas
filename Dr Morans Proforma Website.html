@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EM Proformas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nhs-blue:#005EB8;--nhs-dark:#003087;--nhs-green:#009639;
+  --nhs-red:#DA291C;--nhs-yellow:#FFB81C;--nhs-orange:#ED8B00;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;display:flex;flex-direction:column;min-height:100vh}
+header{background:var(--nhs-dark);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+header h1{font-size:1.2rem;font-weight:700;letter-spacing:.5px}
+.hbadge{background:var(--nhs-blue);border-radius:4px;padding:3px 10px;font-size:.75rem;font-weight:600}
+.layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px)}
+/* Sidebar */
+#sidebar{width:230px;min-width:230px;background:#fff;border-right:2px solid #dde3ef;overflow-y:auto;padding:10px 0;flex-shrink:0}
+.si{padding:8px 12px}
+.si input{width:100%;border:1px solid #ccc;border-radius:6px;padding:5px 8px;font-size:.82rem}
+.nc{padding:6px 14px 3px;font-size:.7rem;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:.8px;margin-top:4px}
+.ni{padding:7px 14px;cursor:pointer;font-size:.85rem;border-left:3px solid transparent;transition:all .15s;display:flex;align-items:center;gap:7px}
+.ni:hover{background:#f0f4ff;border-left-color:var(--nhs-blue)}
+.ni.active{background:#e8f0ff;border-left-color:var(--nhs-blue);font-weight:600;color:var(--nhs-dark)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dr{background:var(--nhs-red)}.do{background:var(--nhs-orange)}.dg{background:var(--nhs-green)}.db{background:var(--nhs-blue)}
+/* Main */
+#main{flex:1;overflow-y:auto;padding:20px}
+.hidden{display:none!important}
+/* Welcome */
+.welcome{text-align:center;padding:60px 20px;color:#555}
+.welcome h2{font-size:1.6rem;color:var(--nhs-dark);margin-bottom:10px}
+.welcome p{font-size:.95rem;color:#666;max-width:500px;margin:0 auto}
+/* Panel */
+.ph{background:linear-gradient(135deg,var(--nhs-dark),var(--nhs-blue));color:#fff;padding:16px 20px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ph h2{font-size:1.2rem;font-weight:700}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{padding:2px 10px;border-radius:12px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+.t-r{background:var(--nhs-red);color:#fff}
+.t-o{background:var(--nhs-orange);color:#fff}
+.t-g{background:var(--nhs-green);color:#fff}
+.t-b{background:var(--nhs-blue);color:#fff}
+/* Tabs */
+.tabs{display:flex;background:#fff;border-bottom:2px solid #dde3ef;flex-wrap:wrap}
+.tb{padding:9px 16px;cursor:pointer;font-size:.82rem;font-weight:500;color:#555;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tb:hover{color:var(--nhs-blue);background:#f5f8ff}
+.tb.active{color:var(--nhs-blue);border-bottom-color:var(--nhs-blue);font-weight:700;background:#fff}
+.tc{display:none;background:#fff;border-radius:0 0 10px 10px;padding:16px}
+.tc.active{display:block}
+/* Cards */
+.card{background:#f8faff;border:1px solid #dde3ef;border-radius:8px;margin-bottom:14px;overflow:hidden}
+.ch{background:#fff;padding:10px 14px;border-bottom:1px solid #dde3ef;display:flex;align-items:center;justify-content:space-between}
+.ch h3{font-size:.95rem;font-weight:600;color:var(--nhs-dark)}
+.cb{padding:12px 14px}
+pre.pf{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:.78rem;line-height:1.55;color:#2a2a4a;background:#fff;border:1px solid #e0e6f0;border-radius:6px;padding:12px;max-height:500px;overflow-y:auto}
+.cpbtn{background:var(--nhs-blue);color:#fff;border:none;padding:5px 14px;border-radius:5px;cursor:pointer;font-size:.78rem;font-weight:600;transition:background .2s}
+.cpbtn:hover{background:var(--nhs-dark)}
+.cpbtn.copied{background:var(--nhs-green)}
+/* Management steps */
+.mstep{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.sn{background:var(--nhs-blue);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;margin-top:2px}
+.sc h4{font-size:.9rem;font-weight:700;color:var(--nhs-dark);margin-bottom:5px}
+.sc ul{padding-left:16px;font-size:.83rem;line-height:1.7}
+.sc p{font-size:.83rem;line-height:1.6}
+.drug{background:#fff3cd;border:1px solid #ffc107;border-radius:3px;padding:1px 5px;font-size:.79rem;font-weight:600;color:#856404}
+/* Alerts */
+.alert{padding:10px 14px;border-radius:6px;font-size:.83rem;line-height:1.5;margin-bottom:12px;border-left:4px solid}
+.a-r{background:#fff5f5;border-color:var(--nhs-red);color:#7a1a1a}
+.a-y{background:#fffbf0;border-color:var(--nhs-yellow);color:#7a5900}
+.a-g{background:#f0fff4;border-color:var(--nhs-green);color:#1a5c2e}
+.a-b{background:#f0f6ff;border-color:var(--nhs-blue);color:#003087}
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:.8rem;margin:8px 0}
+th{background:var(--nhs-dark);color:#fff;padding:7px 10px;text-align:left}
+td{padding:6px 10px;border-bottom:1px solid #e0e6f0}
+tr:hover td{background:#f5f8ff}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏥 EM Proformas</h1>
+  <span class="hbadge">EM Proformas</span>
+  <span class="hbadge" style="background:#009639">NHS UK Guidelines</span>
+</header>
+<div class="layout">
+<div id="sidebar">
+  <div class="si"><input type="text" placeholder="🔍 Search..." oninput="filterNav(this.value)"></div>
+  <div class="nc">Symptoms Approach</div>
+  <div class="ni" onclick="show('syncope')"><span class="dot dr"></span>Syncope</div>
+  <div class="ni" onclick="show('ams')"><span class="dot dr"></span>Altered Mental Status</div>
+  <div class="ni" onclick="show('headache')"><span class="dot dr"></span>Headache</div>
+  <div class="ni" onclick="show('headtrauma')"><span class="dot do"></span>Head Trauma</div>
+  <div class="ni" onclick="show('seizures')"><span class="dot dr"></span>Seizures</div>
+  <div class="ni" onclick="show('sob')"><span class="dot dr"></span>Shortness of Breath</div>
+  <div class="ni" onclick="show('chestpain')"><span class="dot dr"></span>Chest Pain</div>
+  <div class="ni" onclick="show('abdo')"><span class="dot do"></span>Abdominal Pain</div>
+  <div class="ni" onclick="show('pelvic')"><span class="dot do"></span>Pelvic Pain</div>
+  <div class="ni" onclick="show('backpain')"><span class="dot do"></span>Back Pain</div>
+  <div class="ni" onclick="show('pvb')"><span class="dot do"></span>Vaginal Bleeding</div>
+  <div class="ni" onclick="show('redeye')"><span class="dot do"></span>Red Eye</div>
+  <div class="ni" onclick="show('joints')"><span class="dot dg"></span>Mono/Polyarthritis</div>
+  <div class="nc">Selected Emergencies</div>
+  <div class="ni" onclick="show('anaphylaxis')"><span class="dot dr"></span>Anaphylaxis</div>
+  <div class="ni" onclick="show('asthma')"><span class="dot dr"></span>Asthma</div>
+  <div class="ni" onclick="show('copd')"><span class="dot dr"></span>AECOPD</div>
+  <div class="ni" onclick="show('acs')"><span class="dot dr"></span>ACS / STEMI</div>
+  <div class="ni" onclick="show('chf')"><span class="dot dr"></span>Acute Heart Failure</div>
+  <div class="ni" onclick="show('dvtpe')"><span class="dot do"></span>DVT / PE</div>
+  <div class="ni" onclick="show('stroke')"><span class="dot dr"></span>Stroke / TIA</div>
+  <div class="ni" onclick="show('dka')"><span class="dot dr"></span>DKA / HHS</div>
+  <div class="ni" onclick="show('sepsis')"><span class="dot dr"></span>Sepsis</div>
+  <div class="ni" onclick="show('gibleed')"><span class="dot dr"></span>GI Bleed</div>
+  <div class="nc">More Emergencies</div>
+  <div class="ni" onclick="show('toxicology')"><span class="dot dr"></span>Toxicology</div>
+  <div class="ni" onclick="show('psych')"><span class="dot do"></span>Psychiatric Emergencies</div>
+  <div class="ni" onclick="show('paedfever')"><span class="dot do"></span>Paediatric Fever</div>
+  <div class="ni" onclick="show('aki')"><span class="dot do"></span>AKI</div>
+  <div class="ni" onclick="show('electrolytes')"><span class="dot do"></span>Electrolytes</div>
+  <div class="ni" onclick="show('alcohol')"><span class="dot do"></span>Alcohol / Wernicke's</div>
+  <div class="ni" onclick="show('thyroid')"><span class="dot do"></span>Thyroid Emergencies</div>
+  <div class="ni" onclick="show('ent')"><span class="dot do"></span>ENT Emergencies</div>
+</div>
+<div id="main">
+<div class="welcome">
+  <h2>🏥 EM Proformas</h2>
+  <p>Select a presenting complaint or emergency from the sidebar.<br>Each section has a history proforma you can copy into your clinical notes, plus UK NHS management guidance.</p>
+</div>
+
+<!-- SYNCOPE -->
+<div id="p-syncope" class="hidden">
+<div class="ph"><h2>Syncope</h2><div class="tags"><span class="tag t-r">HIGH ACUITY</span><span class="tag t-b">Canadian Syncope Risk Score</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'sy-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'sy-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'sy-inv')">🧪 Investigations</div>
+  <div class="tb" onclick="tab(this,'sy-mgmt')">💊 Management</div>
+</div>
+<div id="sy-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-sy')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-sy">SYNCOPE ASSESSMENT
+===================
+PRESENTING COMPLAINT: Syncope / Loss of Consciousness / Collapse
+
+PRE-SYNCOPAL SYMPTOMS:
+□ Prodrome: Y/N — duration: ___
+□ Lightheadedness / dizziness / nausea
+□ Visual changes (greying out / tunnel vision)
+□ Palpitations / chest pain / dyspnoea (before event)
+□ Aura / déjà vu / epigastric rising
+
+EVENT:
+□ Witnessed: Y/N — witness available: Y/N
+□ Posture at onset: standing / sitting / lying
+□ Duration of LOC: ___
+□ Jerking movements: Y/N — generalised / focal — duration: ___
+□ Tongue biting: Y/N — lateral (seizure) / tip
+□ Urinary/faecal incontinence: Y/N
+□ Eye deviation: Y/N
+
+POST-EVENT:
+□ Confusion / drowsiness after: Y/N — duration: ___
+□ Headache: Y/N
+□ Rapid recovery (&lt;1 min = vasovagal) vs prolonged (seizure/cardiac)
+□ Focal neurological deficit post-event: Y/N
+
+PRECIPITATING FACTORS:
+□ Standing for prolonged period / hot environment (vasovagal)
+□ Emotional trigger / pain / sight of blood (vasovagal)
+□ Exertion (cardiac — aortic stenosis, HCM, arrhythmia)
+□ Turning head / collar pressure (carotid sinus)
+□ Micturition / cough / defaecation (situational)
+□ Change in posture (orthostatic)
+□ No warning (cardiac arrhythmia)
+
+CARDIAC RED FLAGS:
+□ Syncope on exertion
+□ No prodrome
+□ Preceded by chest pain / palpitations
+□ Known structural heart disease (HCM, aortic stenosis, previous MI)
+□ Family history sudden cardiac death / arrhythmia &lt;50yrs
+□ Implanted device (PPM/ICD)
+
+PMHx: IHD / CCF / valve disease / arrhythmia / diabetes / epilepsy / hypertension
+Meds: antihypertensives / diuretics / QT-prolonging drugs / insulin / antiepileptics
+Previous syncopal episodes: Y/N — frequency: ___
+
+EXAMINATION:
+HR: ___  BP: ___/___ (both arms)  Lying/standing BP (postural drop &gt;20mmHg systolic): Y/N
+Temp: ___  SpO2: ___%
+Cardiac: murmurs / irregular rhythm
+Neuro: full neuro exam — focal deficit: Y/N
+Skin: pale / diaphoretic / cyanosed
+ECG: ___
+
+CANADIAN SYNCOPE RISK SCORE (CSRS):
+□ Vasovagal predisposing factor present: -1
+□ Heart disease history: +1
+□ SBP &lt;90 or &gt;180 on arrival: +2
+□ Elevated troponin (&gt;ULN): +2
+□ Abnormal QRS axis: +1
+□ QRS duration &gt;130ms: +1
+□ QTc &gt;480ms: +2
+□ ED diagnosis vasovagal: -2
+CSRS Total: ___ (≥1 = intermediate risk; ≥3 = high risk — admit/monitor)
+
+IMPRESSION:
+Most likely: vasovagal / cardiac arrhythmia / structural cardiac / orthostatic / seizure / other
+CSRS: ___ Risk: low / intermediate / high
+</pre></div></div>
+</div>
+<div id="sy-diff" class="tc">
+<table><tr><th>Category</th><th>Diagnosis</th><th>Key Features</th></tr>
+<tr><td>Vasovagal (reflex)</td><td>Vasovagal syncope</td><td>Prodrome, trigger (pain/standing), rapid recovery</td></tr>
+<tr><td>Vasovagal (reflex)</td><td>Situational (micturition/cough)</td><td>Clear situational trigger</td></tr>
+<tr><td>Orthostatic</td><td>Orthostatic hypotension</td><td>Postural drop &gt;20mmHg systolic, medications, dehydration</td></tr>
+<tr><td>Cardiac arrhythmia</td><td>VT / VF / SVT</td><td>Sudden, no prodrome, palpitations</td></tr>
+<tr><td>Cardiac arrhythmia</td><td>Complete heart block / SSS</td><td>Bradycardia, elderly</td></tr>
+<tr><td>Structural cardiac</td><td>Aortic stenosis / HCM</td><td>Exertional syncope, murmur</td></tr>
+<tr><td>Structural cardiac</td><td>PE / Cardiac tamponade</td><td>Dyspnoea, raised JVP, hypotension</td></tr>
+<tr><td>Neurological</td><td>Seizure</td><td>Prolonged LOC, post-ictal confusion, lateral tongue bite, incontinence</td></tr>
+<tr><td>Neurological</td><td>TIA (vertebrobasilar)</td><td>Focal neuro signs, duration</td></tr>
+<tr><td>Metabolic</td><td>Hypoglycaemia</td><td>Diabetic, BM low, diaphoresis</td></tr>
+</table>
+</div>
+<div id="sy-inv" class="tc">
+<div class="card"><div class="ch"><h3>Investigations</h3></div><div class="cb">
+<p><strong>All syncope:</strong> 12-lead ECG (immediately), BM, U&E, FBC, troponin (hs-troponin at 0h and 3h), lying/standing BP</p>
+<p><strong>Targeted:</strong> Echo (structural cardiac), 24h/7d Holter (arrhythmia), tilt table testing (vasovagal), CT head (if post-ictal/focal neuro/head injury), EEG (if seizure suspected), CXR</p>
+<p><strong>ECG — look for:</strong> QTc prolongation (&gt;450ms M, &gt;460ms F), Brugada pattern, WPW (delta waves), complete heart block, ventricular arrhythmia, LBBB (new), epsilon wave (ARVC), T-wave inversion V1-V3</p>
+</div></div>
+</div>
+<div id="sy-mgmt" class="tc">
+<div class="alert a-r">⚠️ <strong>Exertional syncope, new ECG changes, or CSRS ≥3 → admit for cardiac monitoring</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Immediate</h4>
+<ul><li>12-lead ECG within 10 minutes, continuous monitoring if cardiac suspected</li>
+<li>IV access, BM, bloods including hs-troponin</li>
+<li>Lying/standing BP (postural drop &gt;20/10mmHg = orthostatic)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Low Risk (CSRS &lt;0) — Vasovagal</h4>
+<ul><li>Discharge with safety-netting: avoid triggers, maintain hydration, avoid prolonged standing</li>
+<li>DVLA guidance: must not drive for 6 months if unexplained syncope (check current DVLA rules)</li>
+<li>Refer GP for further follow-up; outpatient Holter if recurrent</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>High Risk (CSRS ≥3) — Cardiac</h4>
+<ul><li>Admit for telemetry/continuous cardiac monitoring</li>
+<li>Cardiology referral. Echocardiogram. Extended Holter or implantable loop recorder.</li>
+<li>Treat underlying cause: antiarrhythmics, PPM, ICD, valve surgery as appropriate</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Orthostatic Hypotension</h4>
+<ul><li>Review and reduce/stop offending medications (antihypertensives, diuretics, alpha-blockers)</li>
+<li>Increase fluid/salt intake. Compression stockings. Rise slowly.</li>
+<li>If autonomic failure: fludrocortisone / midodrine (specialist)</li></ul></div></div>
+</div>
+</div>
+
+<!-- AMS -->
+<div id="p-ams" class="hidden">
+<div class="ph"><h2>Altered Mental Status / Confusion</h2><div class="tags"><span class="tag t-r">HIGH ACUITY</span><span class="tag t-b">4AT Screen</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'am-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'am-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'am-mgmt')">💊 Management</div>
+</div>
+<div id="am-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-am')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-am">ALTERED MENTAL STATUS ASSESSMENT
+==================================
+PRESENTING COMPLAINT: Confusion / Agitation / Reduced GCS / Behavioural change
+
+COLLATERAL HISTORY (from family/carer/crew):
+□ Baseline mental status: ___  (MMSE / AMT baseline if known)
+□ Onset: acute (&lt;hours) / subacute (days) / chronic (weeks/months)
+□ Fluctuating: Y/N (fluctuation = delirium until proven otherwise)
+□ Progressive deterioration: Y/N
+
+DELIRIUM FEATURES (4AT SCORE):
+□ Alertness: normal=0 / mildly sleepy=0 / markedly abnormal=4: ___
+□ AMT4 (age/DOB/place/year): 4 correct=0 / &lt;4=1: ___
+□ Attention (months backwards): 7=0 / &lt;7=1 / unable=2: ___
+□ Acute change / fluctuation: No=0 / Yes=4: ___
+4AT Total: ___ (≥4 = delirium likely; 1-3 = possible cognitive impairment)
+
+AEIOU TIPS MNEMONIC:
+A — Alcohol (intoxication/withdrawal): Y/N
+E — Epilepsy (post-ictal): Y/N
+I — Insulin (hypo/hyperglycaemia): BM ___
+O — Opiates / Overdose: Y/N
+U — Uraemia / Metabolic: Y/N
+T — Trauma (head injury): Y/N
+I — Infection (sepsis/meningitis/UTI/pneumonia/COVID): Y/N
+P — Psychiatric (functional): Y/N
+S — Stroke / Structural (SOL): Y/N
+
+ADDITIONAL CAUSES:
+□ Hypoxia (SpO2 ___%)   □ Hypercapnia   □ Cardiac failure
+□ Hepatic encephalopathy   □ Thyroid disease   □ Wernicke's
+□ Medication (anticholinergics / benzodiazepines / opiates / steroids)
+□ Pain (undertreated)   □ Urinary retention / constipation
+□ Sensory deprivation (hearing aid/glasses missing)
+
+PMHx: dementia / epilepsy / diabetes / liver disease / alcohol misuse / psychiatric history
+Medications: see above — anticholinergics, sedatives, steroids
+Last seen normal: ___
+
+EXAMINATION:
+GCS: ___/15 (E_V_M_)   4AT: ___   BM: ___
+HR: ___   BP: ___/___   Temp: ___   SpO2: ___% on ___L
+Pupils: size ___   reactive: Y/N   PEARL: Y/N
+Signs of infection: chest / urine / skin / meningism (neck stiffness / Kernig's / photophobia)
+Neurological: focal deficit Y/N — which: ___
+Jaundice / stigmata liver disease: Y/N
+Asterixis (hepatic / uraemic): Y/N
+
+IMPRESSION:
+Delirious: Y/N  |  Likely cause: ___
+Severity: mild / moderate / severe  |  Baseline cognition: normal / impaired
+</pre></div></div>
+</div>
+<div id="am-diff" class="tc">
+<table><tr><th>Cause</th><th>Key Features</th><th>Investigation</th></tr>
+<tr><td>Delirium (sepsis)</td><td>Fluctuating, acute, infection signs, NEWS2 elevated</td><td>CRP, cultures, CXR, urine dip</td></tr>
+<tr><td>Hypoglycaemia</td><td>Diabetic, rapid onset, diaphoresis</td><td>BM (do immediately)</td></tr>
+<tr><td>Stroke</td><td>Focal deficit, sudden onset, FAST positive</td><td>CT head, ROSIER score</td></tr>
+<tr><td>Meningitis/Encephalitis</td><td>Fever, neck stiffness, photophobia, rash</td><td>LP (after CT), bloods, empirical abx</td></tr>
+<tr><td>Postictal</td><td>Known epileptic, tongue bite, incontinence</td><td>EEG, CT, AED levels</td></tr>
+<tr><td>Hepatic encephalopathy</td><td>Liver disease, asterixis, jaundice, high ammonia</td><td>LFTs, ammonia, USS liver</td></tr>
+<tr><td>Wernicke's</td><td>Alcohol misuse, ophthalmoplegia, ataxia, confusion</td><td>Thiamine STAT before glucose</td></tr>
+<tr><td>Hyponatraemia</td><td>Headache, seizure, Na+ low</td><td>U&E</td></tr>
+<tr><td>Intracranial bleed</td><td>Head trauma, anticoagulated, sudden headache</td><td>CT head</td></tr>
+<tr><td>Anticholinergic toxidrome</td><td>Dry/flushed/hot, urinary retention, tachycardia</td><td>Drug history, urine dip</td></tr>
+</table>
+</div>
+<div id="am-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>BM immediately in ALL confused patients. Give thiamine before glucose in any alcohol misuser.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Immediate</h4>
+<ul><li>BM — if &lt;4mmol/L: <span class="drug">Glucogel PO</span> or <span class="drug">50ml 50% glucose IV</span> or <span class="drug">Glucagon 1mg IM</span></li>
+<li>ABCs, O₂ if hypoxic, IV access, continuous monitoring</li>
+<li>Thiamine (Pabrinex) before glucose if alcohol history</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Investigations</h4>
+<ul><li>BM, FBC, U&E, LFTs, TFTs, CRP, glucose, calcium, blood cultures, ammonia (if liver disease)</li>
+<li>Urine dip ± MC&S, CXR, ECG, CT head (if focal neuro / head trauma / anticoagulated / first presentation)</li>
+<li>ABG if SpO₂ low, respiratory compromise, or severe metabolic derangement</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Delirium Management (NICE NG20)</h4>
+<ul><li>Treat underlying cause (infection, pain, metabolic)</li>
+<li>Non-pharmacological: reorientation, familiar faces, hearing aids/glasses, avoid restraint, maintain day/night cycle, early mobilisation</li>
+<li>Pharmacological (only if risk of harm): <span class="drug">Haloperidol 0.5-1mg PO/IM</span> (avoid in Parkinson's / Lewy body — use <span class="drug">Quetiapine 12.5-25mg PO</span>)</li>
+<li>Avoid benzodiazepines (worsen delirium) EXCEPT alcohol withdrawal</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Suspected Meningitis</h4>
+<ul><li>DO NOT delay antibiotics for LP if haemodynamically unstable or petechial rash</li>
+<li><span class="drug">Ceftriaxone 2g IV</span> + <span class="drug">Dexamethasone 10mg IV</span> immediately</li>
+<li>Add <span class="drug">Aciclovir 10mg/kg IV</span> if encephalitis suspected (HSV)</li>
+<li>CT head before LP if: focal deficit / papilloedema / GCS &lt;13 / immunocompromised / new-onset seizure</li></ul></div></div>
+</div>
+</div>
+
+<!-- HEADACHE -->
+<div id="p-headache" class="hidden">
+<div class="ph"><h2>Headache</h2><div class="tags"><span class="tag t-r">DON'T MISS SAH</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'hd-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'hd-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'hd-mgmt')">💊 Management</div>
+</div>
+<div id="hd-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-hd')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-hd">HEADACHE ASSESSMENT
+====================
+THUNDERCLAP HEADACHE SCREEN (SAH UNTIL PROVEN OTHERWISE):
+□ Onset: sudden / gradual — time to maximum: ___
+□ "Worst headache of my life": Y/N
+□ Onset during exertion / sexual activity / Valsalva: Y/N
+□ Occipital / nuchal distribution: Y/N
+→ Any YES = CT head urgently → if negative → LP at ≥12h from onset (xanthochromia)
+
+HEADACHE CHARACTERISATION:
+Site: frontal / temporal / occipital / global / unilateral / bilateral
+Onset: sudden (thunderclap) / gradual / progressive
+Character: throbbing / pressure / stabbing / band-like
+Severity: ___/10
+Duration: ___   Frequency: ___   Pattern: first time / recurrent
+
+ASSOCIATED SYMPTOMS:
+□ Nausea / vomiting   □ Photophobia / phonophobia (migraine / meningitis)
+□ Aura (visual scotoma / zigzag / sensory / speech): Y/N — duration: ___
+□ Neck stiffness: Y/N   □ Fever: Y/N   □ Rash: Y/N (meningococcal)
+□ Altered consciousness: Y/N   □ Focal neurology: Y/N
+□ Jaw claudication / scalp tenderness / visual loss (temporal arteritis)
+□ Posture-related (worse lying = raised ICP / worse upright = low-pressure)
+□ Visual changes: blurred / diplopia / loss (papilloedema / CN3 palsy)
+
+RED FLAG FEATURES (SNOOP4):
+S — Systemic symptoms (fever, weight loss, night sweats, immunocompromised / malignancy)
+N — Neurological symptoms (focal deficit, altered consciousness, papilloedema)
+O — Onset (thunderclap, sudden, first-ever severe headache)
+O — Older age (new headache &gt;50yrs — giant cell arteritis)
+P — Postural component   P — Positional (worse with Valsalva)
+P — Papilloedema   P — Progressive worsening
+
+PMHx: migraine / hypertension / malignancy / HIV / coagulopathy / meningitis
+Meds: OCP (cerebral venous thrombosis risk) / anticoagulants / triptans / analgesic frequency
+Analgesic overuse (&gt;10-15 days/month): Y/N
+
+EXAMINATION:
+BP: ___/___   HR: ___   Temp: ___   SpO2: ___%
+Neck stiffness: Y/N   Kernig's: Y/N   Jolt accentuation: Y/N
+Pupils: equal / unequal — size: ___   PEARL: Y/N
+CN3 palsy (ptosis / dilated pupil / down-and-out): Y/N → posterior communicating artery aneurysm
+Fundoscopy (papilloedema): Y/N   Visual fields: normal / defect
+Temporal artery: tender / thickened / pulsatile: Y/N
+Full neuro exam — focal deficit: Y/N
+
+IMPRESSION:
+Most likely: SAH / meningitis / migraine / tension / cluster / GCA / secondary / benign
+Red flags: Y/N — which: ___
+</pre></div></div>
+</div>
+<div id="hd-diff" class="tc">
+<table><tr><th>Diagnosis</th><th>Key Features</th><th>Timecourse</th></tr>
+<tr><td>SAH</td><td>Thunderclap, worst ever, occipital, meningism, sentinel bleed</td><td>Seconds</td></tr>
+<tr><td>Meningitis/Encephalitis</td><td>Fever, neck stiffness, photophobia, rash, confusion</td><td>Hours-days</td></tr>
+<tr><td>Cerebral venous thrombosis</td><td>OCP, pregnancy, progressive, papilloedema, focal deficit</td><td>Days-weeks</td></tr>
+<tr><td>Hypertensive emergency</td><td>BP &gt;180/120, papilloedema, end-organ damage</td><td>Acute</td></tr>
+<tr><td>Giant cell arteritis</td><td>&gt;50yrs, jaw claudication, tender temporal artery, ESR elevated</td><td>Days-weeks</td></tr>
+<tr><td>Raised ICP (SOL/abscess)</td><td>Worse on lying/Valsalva, papilloedema, progressive, malignancy</td><td>Weeks</td></tr>
+<tr><td>Migraine</td><td>Unilateral throbbing, nausea, photo/phonophobia, aura (30%)</td><td>4-72h</td></tr>
+<tr><td>Tension-type</td><td>Bilateral pressure, mild-moderate, no nausea</td><td>30min-7days</td></tr>
+<tr><td>Cluster headache</td><td>Unilateral periorbital, autonomic (lacrimation/rhinorrhoea), male, nocturnal</td><td>15-180min</td></tr>
+</table>
+</div>
+<div id="hd-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Thunderclap/worst-ever headache: CT head urgently. If CT negative → LP ≥12h from onset for xanthochromia (spectrophotometry).</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>SAH Protocol</h4>
+<ul><li>CT head STAT (sensitivity ~98% within 6h, lower after)</li>
+<li>If CT negative + onset &lt;6h: consider CTA or LP at 12h</li>
+<li>LP at ≥12h: xanthochromia (spectrophotometry — not just visual inspection)</li>
+<li>If SAH confirmed: neurosurgery referral immediately. Nimodipine 60mg PO q4h (vasospasm prevention).</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Migraine (BASH Guidelines)</h4>
+<ul><li>Acute: <span class="drug">Aspirin 900mg PO</span> + <span class="drug">Metoclopramide 10mg PO/IV</span> (or <span class="drug">Prochlorperazine 10mg PO/3mg buccal</span>)</li>
+<li>If fails: <span class="drug">Sumatriptan 50-100mg PO</span> (or 6mg SC) — avoid if hemiplegic migraine / cardiovascular disease</li>
+<li>Severe/refractory: <span class="drug">Sumatriptan 6mg SC</span> + <span class="drug">Prochlorperazine 12.5mg IM</span></li>
+<li>IV option: <span class="drug">IV paracetamol 1g</span> + <span class="drug">IV metoclopramide 10mg</span> + fluids</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Cluster Headache</h4>
+<ul><li><span class="drug">100% O₂ via non-rebreathe mask 12-15 L/min for 15-20 min</span> (very effective)</li>
+<li><span class="drug">Sumatriptan 6mg SC</span></li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Giant Cell Arteritis (GCA)</h4>
+<ul><li>ESR + CRP urgently. Temporal artery biopsy arranged within 2 weeks.</li>
+<li>If visual symptoms: <span class="drug">Methylprednisolone 500mg-1g IV</span> (same day)</li>
+<li>Without visual symptoms: <span class="drug">Prednisolone 40-60mg PO OD</span> immediately — do not wait for biopsy</li></ul></div></div>
+</div>
+</div>
+
+<!-- HEAD TRAUMA -->
+<div id="p-headtrauma" class="hidden">
+<div class="ph"><h2>Head Trauma</h2><div class="tags"><span class="tag t-o">NICE NG232</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'ht-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'ht-mgmt')">💊 NICE NG232 Guidance</div>
+</div>
+<div id="ht-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-ht')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-ht">HEAD TRAUMA ASSESSMENT
+=======================
+MECHANISM:
+□ RTA (speed / airbag / ejected / cyclist / pedestrian)
+□ Fall — height: ___ / surface: ___
+□ Assault — weapon: ___
+□ Sport / recreational injury
+□ Domestic accident
+
+CT HEAD INDICATIONS (NICE NG232 — scan within 1h if any):
+High-risk features:
+□ GCS &lt;13 at any point
+□ GCS 13-14 at 2h post-injury
+□ Suspected open / depressed / basal skull fracture
+  (haemotympanum / CSF from ear or nose / Battle's sign / panda eyes / Battle's sign)
+□ Post-traumatic seizure
+□ Focal neurological deficit
+□ ≥1 episode vomiting (adult) — consider in context
+□ Age ≥65 with any LOC or amnesia
+□ Coagulopathy / anticoagulation (warfarin / DOAC / aspirin + clopidogrel) — LOWER THRESHOLD
+
+Intermediate features (CT if &gt;30 min amnesia or dangerous mechanism):
+□ LOC / amnesia with dangerous mechanism
+  (pedestrian/cyclist vs vehicle, ejection from vehicle, fall &gt;1m/5 stairs, head struck by high-velocity projectile)
+□ Amnesia &gt;30 min before impact (retrograde): Y/N
+□ Age &gt;65 with no LOC/amnesia but dangerous mechanism: Y/N
+
+SYMPTOMS:
+□ LOC: Y/N — duration: ___
+□ Amnesia: retrograde ___min / anterograde: Y/N — duration: ___
+□ Headache: current ___/10 / worsening: Y/N
+□ Vomiting: episodes: ___
+□ Confusion: Y/N   □ Seizure post-injury: Y/N
+□ Visual disturbance: Y/N   □ Focal weakness: Y/N
+□ Cerebrospinal fluid from ear/nose: Y/N
+
+ANTICOAGULATION:
+□ Warfarin: INR ___   □ DOAC: drug ___ / last dose ___   □ Aspirin   □ Clopidogrel
+→ CT head regardless of GCS if on anticoagulation
+
+PMHx: haematological disorder / liver disease / previous neurosurgery / VP shunt
+Alcohol: Y/N (confounds GCS assessment)
+
+EXAMINATION:
+GCS: ___/15 (E_V_M_)  at ___ min post-injury
+AVPU: A / V / P / U
+HR: ___  BP: ___/___  (Cushing's triad: bradycardia + hypertension + irregular resp)
+Pupils: L ___mm R ___mm  PEARL: Y/N (unequal = herniation until proven otherwise)
+Signs of basal skull fracture:
+  Battle's sign (bruising behind ear): Y/N
+  Raccoon/panda eyes (periorbital bruising): Y/N
+  CSF from ear (haemotympanum): Y/N
+  CSF from nose: Y/N
+Scalp lacerations / haematoma / boggy swelling: location: ___
+Full neuro exam: focal deficit: Y/N
+
+IMPRESSION:
+CT indicated: Y/N — indication: ___
+GCS at presentation: ___  GCS trend: improving / static / deteriorating
+Anticoagulated: Y/N
+</pre></div></div>
+</div>
+<div id="ht-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Anticoagulated patients: CT head within 1h regardless of GCS. Unequal pupils = call neurosurgery immediately.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>CT Positive — Intracranial Haemorrhage</h4>
+<ul><li>Neurosurgery referral immediately. Repeat CT if deterioration.</li>
+<li>Reverse anticoagulation if present: warfarin → <span class="drug">Vitamin K 10mg IV + Beriplex/PCC (Octaplex) dose per INR</span>; DOACs → reversal agent if available (idarucizumab for dabigatran, andexanet alfa for Xa inhibitors)</li>
+<li>Target SBP &lt;160mmHg. Avoid hypotension (CPP = MAP − ICP).</li>
+<li>TXA 1g IV if significant haemorrhage within 3h of injury</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>CT Negative / Minor Head Injury</h4>
+<ul><li>Observe for minimum 4h if: LOC, amnesia, persistent headache, vomiting, GCS &lt;15</li>
+<li>Discharge criteria: GCS 15, no red flags, responsible adult at home, head injury advice sheet given</li>
+<li>Head injury advice: return immediately if worsening headache, repeated vomiting, seizure, focal weakness, unusual drowsiness</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Anticoagulated + CT Negative</h4>
+<ul><li>NICE: consider 24h observation or early repeat CT (6-8h) for anticoagulated patients with head injury — discuss with senior</li>
+<li>Do not restart anticoagulation without senior/haematology advice</li></ul></div></div>
+</div>
+</div>
+
+<!-- SEIZURES -->
+<div id="p-seizures" class="hidden">
+<div class="ph"><h2>Seizures</h2><div class="tags"><span class="tag t-r">NICE NG217</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'sz-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'sz-mgmt')">💊 Status Epilepticus Protocol</div>
+</div>
+<div id="sz-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-sz')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-sz">SEIZURE ASSESSMENT
+===================
+PRESENTING COMPLAINT: Seizure / Convulsion / Fit / Funny turn
+
+EVENT DESCRIPTION (witness if possible):
+□ Type: generalised tonic-clonic / absence / focal / myoclonic / unknown
+□ Duration: ___min   □ Cluster / multiple episodes: Y/N — number: ___
+□ Time from onset to now: ___
+□ Tongue biting: Y/N — lateral (GTCS) / tip (syncope)
+□ Incontinence (urinary/faecal): Y/N
+□ Eye deviation: Y/N — which direction: ___
+□ Post-ictal state: Y/N — duration: ___min
+□ Focal onset observed: Y/N (onset in one limb/side)
+
+CURRENT STATUS:
+□ Seizure ongoing: Y/N — duration: ___ minutes
+□ GCS: ___/15   □ Orientated: Y/N
+
+STATUS EPILEPTICUS CRITERIA:
+□ Continuous seizure ≥5 minutes: Y/N
+□ Recurrent seizures without recovery between: Y/N
+→ STATUS — initiate protocol immediately
+
+FIRST EVER SEIZURE:
+□ Previous seizures: Y/N
+□ Known epilepsy: Y/N — syndrome: ___ — AED: ___
+□ AED compliance: Y/N — last dose: ___
+
+PRECIPITANTS / CAUSES (AEIOU TIPS):
+□ Alcohol withdrawal (last drink: ___)
+□ Hypoglycaemia (BM: ___)
+□ Electrolyte disturbance (Na / Ca / Mg)
+□ Infection (meningitis / encephalitis / fever — paediatric)
+□ Head trauma
+□ Stroke / intracranial haemorrhage
+□ Medications (tricyclics / theophylline / tramadol / bupropion / quinolones — lower threshold)
+□ Recreational drugs / toxins
+□ Eclampsia (pregnant: Y/N — gestation: ___)
+□ Brain tumour / SOL
+□ Sleep deprivation / stress / missed medication
+□ Idiopathic / breakthrough epilepsy
+
+PMHx: known epilepsy / previous seizures / neurosurgery / malignancy / liver disease / HIV
+Medications: AEDs (which / dose / compliance) / drugs lowering seizure threshold
+Pregnancy status: Y/N
+
+EXAMINATION:
+GCS: ___/15  BM: ___  HR: ___  BP: ___/___  Temp: ___  SpO2: ___%
+Tongue trauma: Y/N   Post-ictal confusion: Y/N
+Focal neurological deficit (Todd's paresis): Y/N — which limb/side: ___
+Signs of meningism: neck stiffness / Kernig's / photophobia: Y/N
+Signs of trauma: Y/N
+Signs of alcohol/drug use: Y/N
+Skin: stigmata neurocutaneous syndromes (café au lait / ash leaf / port wine stain)
+
+INVESTIGATIONS:
+BM (immediately), U&E (Na/Ca/Mg), FBC, glucose, AED levels (if applicable), CRP
+Toxicology screen (urine), blood cultures (if febrile)
+CT head: first seizure / focal deficit / post-ictal for &gt;1h / immunocompromised / malignancy / trauma
+LP: suspected meningitis/encephalitis (after CT)
+EEG: outpatient (not acute unless NCSE suspected)
+
+IMPRESSION:
+Provoked / unprovoked   First / recurrent   Focal / generalised
+Status epilepticus: Y/N   Cause: ___
+</pre></div></div>
+</div>
+<div id="sz-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>STATUS EPILEPTICUS: Seizure ≥5 minutes. Follow timeline strictly — benzodiazepine at 0 min, 2nd line at 10-20 min, anaesthetic at 30-40 min.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>0-5 min — First-Line: Benzodiazepine</h4>
+<ul><li>IV access available: <span class="drug">Lorazepam 4mg IV</span> — can repeat once after 10 min</li>
+<li>No IV access: <span class="drug">Midazolam 10mg buccal</span> (or <span class="drug">Diazepam 10mg PR</span>)</li>
+<li>Simultaneously: O₂ high-flow, airway positioning, BM, IV access × 2</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>10-20 min — Second-Line (if still seizing)</h4>
+<ul><li><span class="drug">Levetiracetam 60mg/kg IV (max 4500mg) over 10 min</span> (NICE preferred — fewer interactions)</li>
+<li>Or <span class="drug">Sodium valproate 40mg/kg IV (max 3000mg) over 5 min</span> (avoid in women of childbearing age / pregnancy)</li>
+<li>Or <span class="drug">Phenytoin 20mg/kg IV at 50mg/min with cardiac monitoring</span></li>
+<li>Alert anaesthetics / ITU now</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>30-40 min — Refractory Status: Anaesthetic</h4>
+<ul><li>Anaesthetist + ITU immediately for RSI and intubation</li>
+<li><span class="drug">Propofol / Thiopental / Midazolam infusion</span> (specialist-led)</li>
+<li>Continuous EEG monitoring if available</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Eclampsia</h4>
+<ul><li><span class="drug">Magnesium sulphate 4g IV over 5-15 min</span>, then <span class="drug">1g/h infusion</span></li>
+<li>Obstetrics emergency — delivery of baby may be required</li>
+<li>Target MgSO4 levels 2-4 mmol/L. Antidote: <span class="drug">Calcium gluconate 10ml 10% IV</span></li></ul></div></div>
+<div class="mstep"><div class="sn">5</div><div class="sc"><h4>Post-Seizure (First Seizure / Unprovoked)</h4>
+<ul><li>CT head, outpatient EEG, neurology referral</li>
+<li>DVLA: must not drive for 6 months (DVLA seizure guidelines). Advise and document.</li>
+<li>Do not start AEDs in ED for single first seizure without neurology input</li>
+<li>Safety advice: no solo bathing, heights, hazardous machinery</li></ul></div></div>
+</div>
+</div>
+
+<!-- SOB -->
+<div id="p-sob" class="hidden">
+<div class="ph"><h2>Shortness of Breath</h2><div class="tags"><span class="tag t-r">HIGH ACUITY</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'sb-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'sb-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'sb-mgmt')">💊 Management</div>
+</div>
+<div id="sb-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-sb')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-sb">SHORTNESS OF BREATH ASSESSMENT
+================================
+PRESENTING COMPLAINT: Dyspnoea / Breathlessness / SOB
+
+CHARACTERISATION:
+Onset: sudden (pneumothorax / PE / pulm oedema) / gradual (days/weeks)
+Duration: ___   Severity: mild / moderate / severe / unable to speak in full sentences
+Exertional: Y/N — exercise tolerance now: ___ / baseline: ___
+Rest symptoms: Y/N   Orthopnoea (pillows: ___): Y/N   PND: Y/N
+Wheeze: Y/N   Stridor: Y/N (upper airway — consider epiglottitis / anaphylaxis)
+Pleuritic chest pain: Y/N (PE / pneumonia / pneumothorax / pleuritis)
+Cough: Y/N — productive: Y/N — sputum: colour / amount
+Haemoptysis: Y/N
+
+PE SCREEN (PERC Rule — if low pretest probability):
+□ Age &lt;50   □ HR &lt;100   □ SpO2 ≥95%   □ No unilateral leg swelling
+□ No haemoptysis   □ No recent surgery/trauma   □ No prior PE/DVT   □ No oestrogen use
+(All 8 PERC negative = low probability, no further testing needed)
+
+WELLS PE SCORE:
+□ DVT signs/symptoms: +3   □ No alternative diagnosis: +3
+□ HR &gt;100: +1.5   □ Immobility/surgery &lt;4wks: +1.5
+□ Previous VTE: +1.5   □ Haemoptysis: +1   □ Malignancy: +1
+Wells Total: ___  [&lt;2 low / 2-6 moderate / &gt;6 high]
+
+ASSOCIATED SYMPTOMS:
+□ Fever / chills / purulent sputum (pneumonia)
+□ Ankle swelling / leg pain / recent immobility / long-haul flight (DVT/PE)
+□ Chest pain: character / radiation
+□ Palpitations   □ Syncope   □ Diaphoresis
+
+PMHx: COPD / asthma / cardiac failure / PE/DVT / malignancy / immunosuppression / smoking (pack-years: ___)
+Medications: ACEi (cough) / OCP / beta-blockers (mask symptoms) / anticoagulants
+Recent travel / surgery / immobility: Y/N
+Allergy / recent exposure / new drug (anaphylaxis): Y/N
+
+EXAMINATION:
+HR: ___  RR: ___  SpO2: ___%  on ___L O₂  BP: ___/___  Temp: ___
+Work of breathing: mild / moderate / severe (accessory muscles / tracheal tug / paradoxical breathing)
+Cyanosis: Y/N   Pursed-lip breathing: Y/N
+Chest expansion: equal / unequal — side: ___
+Percussion: resonant / dull / hyper-resonant (___side)
+Auscultation: clear / wheeze / creps (fine/coarse) / absent breath sounds / pleural rub
+JVP: ___cm  Peripheral oedema: Y/N   Heart sounds: normal / added (S3/S4)
+Tracheal deviation: Y/N — towards (collapse) / away (tension)
+
+INVESTIGATIONS:
+ABG (if SpO2 &lt;94% or severe): pH___ pO2___ pCO2___ HCO3___ BE___
+CXR (portable if severe)   ECG
+FBC / U&E / CRP / BNP or NT-proBNP (CCF) / D-dimer (if Wells low-moderate)
+hs-Troponin (if chest pain)   LFTs (if hepatic cause)   Sputum MC&S
+
+IMPRESSION:
+Most likely cause: ___   Severity: mild / moderate / severe / life-threatening
+</pre></div></div>
+</div>
+<div id="sb-diff" class="tc">
+<table><tr><th>Diagnosis</th><th>Key Features</th><th>Key Investigation</th></tr>
+<tr><td>Pneumonia</td><td>Fever, productive cough, focal creps, consolidation on CXR</td><td>CXR, CRP, blood cultures</td></tr>
+<tr><td>Asthma (acute)</td><td>Wheeze, young, atopic, PEFR low</td><td>PEFR, ABG if severe</td></tr>
+<tr><td>AECOPD</td><td>Smoker, known COPD, increased sputum, wheeze</td><td>ABG, CXR, sputum</td></tr>
+<tr><td>PE</td><td>Pleuritic pain, DVT risk factors, tachycardia, hypoxia</td><td>CTPA, D-dimer, Wells</td></tr>
+<tr><td>Acute pulmonary oedema</td><td>PND, orthopnoea, fine creps, S3, elevated BNP</td><td>BNP, CXR (bat wing), Echo</td></tr>
+<tr><td>Pneumothorax</td><td>Sudden onset, pleuritic pain, unilateral decreased BS, hyper-resonant</td><td>CXR, USS</td></tr>
+<tr><td>Tension pneumothorax</td><td>Tracheal deviation, absent BS, haemodynamic compromise</td><td>Clinical diagnosis — treat immediately</td></tr>
+<tr><td>Anaphylaxis</td><td>Allergen exposure, urticaria, angioedema, stridor</td><td>Clinical — mast cell tryptase</td></tr>
+<tr><td>Pleural effusion</td><td>Dull to percussion, stony dull, reduced vocal resonance</td><td>CXR, USS, diagnostic tap</td></tr>
+</table>
+</div>
+<div id="sb-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Tension pneumothorax: clinical diagnosis — immediate needle decompression, do NOT wait for CXR</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Immediate — All SOB</h4>
+<ul><li>Sit up, high-flow O₂ if SpO₂ &lt;94% (target 94-98%; COPD target 88-92% pending ABG)</li>
+<li>ABG if severe / SpO₂ &lt;94% / COPD</li>
+<li>IV access, continuous monitoring, 12-lead ECG, portable CXR</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Tension Pneumothorax</h4>
+<ul><li>Needle decompression: <span class="drug">14-16G cannula 2nd ICS mid-clavicular line</span> (or 4th/5th ICS anterior axillary line — BTS preferred)</li>
+<li>Followed by chest drain insertion (see pneumothorax section)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Pneumonia (NICE NG138 / BTS)</h4>
+<ul><li>CURB-65: Confusion / Urea &gt;7 / RR ≥30 / BP &lt;90/60 / Age ≥65 — 1pt each</li>
+<li>0-1: oral abx, consider discharge. 2: hospital admission. ≥3: severe, consider ITU.</li>
+<li>Community (CAP): <span class="drug">Amoxicillin 500mg-1g PO TDS</span> ± <span class="drug">Clarithromycin 500mg PO BD</span></li>
+<li>Severe/IV: <span class="drug">Co-amoxiclav 1.2g IV TDS</span> + <span class="drug">Clarithromycin 500mg IV BD</span></li>
+<li>Penicillin allergy: <span class="drug">Levofloxacin 500mg IV OD</span></li></ul></div></div>
+</div>
+</div>
+
+<!-- CHEST PAIN -->
+<div id="p-chestpain" class="hidden">
+<div class="ph"><h2>Chest Pain</h2><div class="tags"><span class="tag t-r">NICE NG185</span><span class="tag t-b">HEART Score / ESC 0h/1h</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'cp-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'cp-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'cp-mgmt')">💊 Management</div>
+</div>
+<div id="cp-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-cp')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-cp">CHEST PAIN ASSESSMENT
+======================
+CHARACTERISATION (SOCRATES):
+Site: central / left / right / epigastric / other: ___
+Onset: sudden / gradual — time: ___ — at rest / on exertion / postprandial
+Character: crushing / pressure / tight / sharp / burning / tearing / pleuritic
+Radiation: left arm / jaw / back (tearing = aortic dissection) / shoulder / epigastric
+Associated: sweating / nausea / vomiting / dyspnoea / syncope / palpitations
+Time: continuous / intermittent — duration of each episode: ___
+Exacerbating: inspiration (pleuritic) / exertion (angina/ACS) / lying flat / palpation (MSK/costochondritis)
+Relieving: GTN (&lt;5 min = angina; also oesophageal spasm) / sitting forward (pericarditis / pancreatitis) / antacids (GORD)
+Severity: ___/10
+
+CARDIAC RISK FACTORS:
+□ Hypertension   □ Diabetes   □ Hypercholesterolaemia   □ Smoking (pack-years: ___)
+□ Family history IHD (&lt;65F/&lt;55M)   □ Previous MI / PCI / CABG   □ Peripheral vascular disease
+□ Obesity   □ CKD   □ Atrial fibrillation
+
+AORTIC DISSECTION RED FLAGS:
+□ Sudden onset tearing/ripping pain radiating to back
+□ BP differential between arms (&gt;20mmHg)
+□ Pulse deficit   □ New aortic regurgitation murmur
+□ Marfan's / connective tissue disorder / uncontrolled hypertension
+→ CT aortogram urgently if suspected. Do NOT give thrombolytics.
+
+HEART SCORE:
+H — History: highly suspicious=2 / moderately suspicious=1 / slightly suspicious=0: ___
+E — ECG: LBBB/ST changes=2 / non-specific repolarisation=1 / normal=0: ___
+A — Age: ≥65=2 / 45-64=1 / &lt;45=0: ___
+R — Risk factors: ≥3 or DM=2 / 1-2=1 / none=0: ___
+T — Troponin: &gt;3×ULN=2 / 1-3×ULN=1 / ≤ULN=0: ___
+HEART Total: ___ [0-3 low (discharge safe); 4-6 intermediate; 7-10 high (ACS)]
+
+ESC 0h/1h hs-TROPONIN PATHWAY (if hs-Trop used):
+0h: ___ pg/mL   1h: ___ pg/mL
+Rule-out: 0h &lt;5 AND 1h &lt;5 (low risk — discharge if low clinical probability)
+Rule-in: 0h &gt;52 OR delta at 1h &gt;6 (NSTEMI likely — admit)
+
+EXAMINATION:
+HR: ___  BP: ___/___ (both arms, note difference: ___)
+RR: ___  SpO2: ___%  Temp: ___
+JVP: ___cm  Cardiac: murmur (aortic regurgitation / friction rub)
+Chest: breath sounds / creps / wheeze / pleural rub
+Abdomen: epigastric tenderness (pancreatitis/GORD/peptic ulcer)
+Chest wall tenderness (MSK/costochondritis): Y/N
+Pericardial friction rub: Y/N (pericarditis)
+
+IMPRESSION:
+Most likely: ACS / PE / aortic dissection / pericarditis / pneumonia / MSK / GORD
+HEART score: ___   Risk: low / intermediate / high
+STEMI on ECG: Y/N
+</pre></div></div>
+</div>
+<div id="cp-diff" class="tc">
+<table><tr><th>Diagnosis</th><th>Key Features</th><th>Red Flags</th></tr>
+<tr><td>STEMI</td><td>ST elevation ≥2 leads, new LBBB, severe crushing pain</td><td>Cath lab activation</td></tr>
+<tr><td>NSTEMI/UA</td><td>Troponin rise, ECG changes (ST dep/T inversion), ischaemic pain</td><td>HEART ≥4</td></tr>
+<tr><td>Aortic dissection</td><td>Tearing, back radiation, BP arm differential, pulse deficit</td><td>No thrombolytics</td></tr>
+<tr><td>PE</td><td>Pleuritic, hypoxia, tachycardia, DVT risk factors</td><td>Haemodynamic compromise</td></tr>
+<tr><td>Pericarditis</td><td>Sharp, worse lying, better sitting forward, friction rub, saddle ST</td><td>Tamponade signs</td></tr>
+<tr><td>Pneumothorax</td><td>Sudden, pleuritic, unilateral, hyper-resonant</td><td>Tension signs</td></tr>
+<tr><td>Pneumonia</td><td>Fever, productive cough, pleuritic, creps</td><td>Sepsis</td></tr>
+<tr><td>GORD/Oesophageal</td><td>Burning, postprandial, relieved by antacids, GTN (spasm)</td><td>Diagnosis of exclusion</td></tr>
+<tr><td>Costochondritis</td><td>Reproducible on palpation, no radiation</td><td>Diagnosis of exclusion</td></tr>
+</table>
+</div>
+<div id="cp-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>STEMI: activate cath lab immediately. Target door-to-balloon &lt;90 min. Call cardiologist NOW.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>STEMI (Immediate)</h4>
+<ul><li><span class="drug">Aspirin 300mg PO</span> (loading) + <span class="drug">Ticagrelor 180mg PO</span> (or <span class="drug">Clopidogrel 600mg</span> if Ticagrelor contraindicated)</li>
+<li><span class="drug">Morphine 2.5-5mg IV titrated</span> + <span class="drug">Metoclopramide 10mg IV</span> (antiemetic)</li>
+<li>Primary PCI (PPCI) — activate cath lab. If PPCI unavailable and &lt;2h from onset: thrombolysis.</li>
+<li>O₂ only if SpO₂ &lt;94%</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>NSTEMI/ACS</h4>
+<ul><li><span class="drug">Aspirin 300mg PO</span> + <span class="drug">Ticagrelor 180mg PO</span></li>
+<li>Anticoagulation: <span class="drug">Fondaparinux 2.5mg SC</span> (first-line NICE) or <span class="drug">Enoxaparin 1mg/kg SC BD</span></li>
+<li>GRACE score to determine urgency of angiography. High risk (&gt;140): &lt;24h. Intermediate: &lt;72h.</li>
+<li>GTN: <span class="drug">GTN spray 400mcg SL</span> prn (if SBP &gt;90mmHg)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Pericarditis</h4>
+<ul><li><span class="drug">Ibuprofen 600mg TDS PO</span> + <span class="drug">Colchicine 500mcg BD PO</span> (reduces recurrence — ESC recommended)</li>
+<li>Avoid NSAIDs if post-MI (use colchicine alone)</li>
+<li>Restrict exercise until symptom-free + CRP normal</li>
+<li>Echo to exclude tamponade</li></ul></div></div>
+</div>
+</div>
+
+<!-- ABDOMINAL PAIN -->
+<div id="p-abdo" class="hidden">
+<div class="ph"><h2>Abdominal Pain</h2><div class="tags"><span class="tag t-o">TIME-SENSITIVE</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'ab-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'ab-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'ab-mgmt')">💊 Management</div>
+</div>
+<div id="ab-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-ab')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-ab">ABDOMINAL PAIN ASSESSMENT
+==========================
+CHARACTERISATION (SOCRATES):
+Site: RUQ / RLQ / LUQ / LLQ / epigastric / periumbilical / suprapubic / generalised / loin
+Onset: sudden (perforation/vascular) / gradual — duration: ___
+Character: colicky (bowel/biliary/renal) / constant (inflammation/ischaemia) / cramping
+Radiation: to back (AAA/pancreatitis/aortic dissection) / to shoulder tip (diaphragmatic irritation) / groin (renal colic)
+Severity: ___/10
+Exacerbating: movement (peritonitis) / eating (ischaemic colitis/peptic ulcer/pancreatitis)
+Relieving: passing flatus/stool (IBS) / analgesia / position
+
+ASSOCIATED SYMPTOMS:
+□ Nausea / vomiting (onset relative to pain: before/after)
+□ Diarrhoea (bloody: Y/N) / constipation / last bowel motion: ___
+□ Last flatus: ___  (obstruction if absent)
+□ Fever / rigors / sweating
+□ Jaundice / dark urine / pale stools (biliary)
+□ Dysuria / urinary frequency / haematuria (renal/UTI)
+□ LMP: ___ — pregnancy possible: Y/N (BHCG in all women of childbearing age)
+□ Vaginal discharge / PV bleeding
+□ Haematemesis / PR bleeding / melaena (GI)
+□ Weight loss / anorexia (malignancy)
+
+SURGICAL HISTORY / RISK FACTORS:
+□ Previous abdominal surgery (adhesions / bowel obstruction)
+□ Previous AAA / known AAA (EMERGENCY — pulsatile mass + back pain = rupture until proven otherwise)
+□ IBD / diverticular disease / hernia
+□ Alcohol (pancreatitis) / gallstones (biliary colic / cholecystitis / pancreatitis)
+□ Immunosuppressed / HIV (atypical presentations)
+
+PMHx: previous similar episodes / malignancy / IBD / vascular disease
+Meds: NSAIDs (peptic ulcer) / steroids (mask peritonism) / anticoagulants
+
+EXAMINATION:
+HR: ___ BP: ___/___ Temp: ___ SpO2: ___%
+Abdomen: distension / scars / hernia (inguinal/femoral/umbilical — reducible: Y/N)
+Palpation: tenderness location: ___
+  Guarding: voluntary / involuntary   Rigidity: Y/N   Rebound: Y/N
+  Murphy's sign: Y/N (RUQ — cholecystitis)   Rovsing's sign: Y/N (RLQ — appendicitis)
+  Psoas sign: Y/N   Obturator sign: Y/N
+  Pulsatile mass: Y/N — site: ___ (AAA emergency)
+Percussion: tympanic / dull / liver dullness
+Bowel sounds: normal / absent / tinkling (obstruction)
+PR examination: Y/N — findings: ___
+Hernial orifices: checked Y/N
+
+IMPRESSION:
+Surgical emergency: Y/N   Peritonism: Y/N
+Most likely: ___   BHCG result: ___
+</pre></div></div>
+</div>
+<div id="ab-diff" class="tc">
+<table><tr><th>Region</th><th>Diagnosis</th><th>Key Feature</th></tr>
+<tr><td>Generalised</td><td>Bowel perforation</td><td>Sudden, rigid abdomen, surgical emergency</td></tr>
+<tr><td>Generalised</td><td>Peritonitis</td><td>Involuntary guarding, rebound, rigid</td></tr>
+<tr><td>Generalised</td><td>Mesenteric ischaemia</td><td>Pain out of proportion, AF, vascular disease</td></tr>
+<tr><td>Generalised</td><td>Ruptured AAA</td><td>Pulsatile mass, back pain, haemodynamic compromise</td></tr>
+<tr><td>RUQ</td><td>Biliary colic / cholecystitis</td><td>Fatty food, Murphy's sign, fever (cholecystitis)</td></tr>
+<tr><td>Epigastric</td><td>Pancreatitis</td><td>Alcohol/gallstones, radiates to back, elevated lipase</td></tr>
+<tr><td>Epigastric</td><td>Peptic ulcer / perforation</td><td>NSAIDs, Helicobacter, worse on eating</td></tr>
+<tr><td>RLQ</td><td>Appendicitis</td><td>Migration periumbilical→RLQ, Rovsing's, fever</td></tr>
+<tr><td>LLQ</td><td>Diverticulitis</td><td>Elderly, LLQ, altered bowel habit, fever</td></tr>
+<tr><td>Loin</td><td>Renal colic</td><td>Loin-to-groin, colicky, haematuria, restless patient</td></tr>
+</table>
+</div>
+<div id="ab-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Pulsatile abdominal mass + back pain = ruptured AAA — surgical emergency. O negative blood, call vascular surgeon NOW.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>All Acute Abdomen</h4>
+<ul><li>IV access, analgesia (do NOT withhold — does not mask signs), anti-emetics</li>
+<li>BHCG in all women of childbearing age (exclude ectopic)</li>
+<li>Bloods: FBC, U&E, LFTs, amylase/lipase, CRP, coagulation, G&S</li>
+<li>USS abdomen (first-line). CT abdomen/pelvis if surgical emergency / diagnosis uncertain / USS inconclusive.</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Pancreatitis (GLASGOW / Modified Glasgow Criteria)</h4>
+<ul><li>Nil by mouth, aggressive IV fluids (Hartmann's / NaCl 0.9%)</li>
+<li>GLASGOW score: PaO2&lt;8/Age&gt;55/Neutrophils&gt;15/Calcium&lt;2/Urea&gt;16/Enzymes (LDH&gt;600/AST&gt;200)/Albumin&lt;32/Glucose&gt;10 — ≥3 = severe</li>
+<li>Analgesia: <span class="drug">IV morphine</span> titrated. <span class="drug">Ondansetron 4mg IV</span>.</li>
+<li>ITU/HDU if severe. ERCP if gallstone pancreatitis + cholangitis.</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Renal Colic</h4>
+<ul><li><span class="drug">Diclofenac 75mg IM</span> or <span class="drug">100mg PR</span> (first-line unless CKD/peptic ulcer)</li>
+<li>Or <span class="drug">IV morphine</span> ± <span class="drug">metoclopramide 10mg IV</span></li>
+<li>CT KUB (non-contrast) — gold standard. USS if pregnant or CT unavailable.</li>
+<li>Urology referral if: stone &gt;10mm / single kidney / obstructed + infected (emergency)</li></ul></div></div>
+</div>
+</div>
+
+<!-- PELVIC PAIN -->
+<div id="p-pelvic" class="hidden">
+<div class="ph"><h2>Pelvic Pain</h2><div class="tags"><span class="tag t-r">EXCLUDE ECTOPIC</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'pl-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'pl-mgmt')">💊 Management</div>
+</div>
+<div id="pl-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-pl')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-pl">PELVIC PAIN ASSESSMENT
+=======================
+⚠️ BHCG IMMEDIATELY in all women of childbearing age — exclude ectopic pregnancy
+
+BHCG: ___   Pregnancy status: ___
+
+ECTOPIC PREGNANCY RED FLAGS (any = investigate urgently):
+□ BHCG positive + pelvic pain   □ Haemodynamic instability
+□ Shoulder tip pain (diaphragmatic irritation from haemoperitoneum)
+□ Peritonism / guarding / rigidity
+□ Intrauterine device in situ
+
+CHARACTERISATION:
+LMP: ___ (date) — regular: Y/N   Cycle length: ___
+Contraception: pill / IUD / none / other: ___
+Sexual activity: Y/N   Last UPSI: ___
+Onset: sudden / gradual   Duration: ___
+Site: central / right / left / bilateral   Radiation: ___
+Character: colicky / constant / cramping   Severity: ___/10
+Relation to menstrual cycle: pre-menstrual / mid-cycle / constant
+
+ASSOCIATED SYMPTOMS:
+□ PV bleeding: Y/N — amount / colour / clots (see vaginal bleeding section)
+□ Vaginal discharge: colour / odour / amount — change from normal: Y/N
+□ Dyspareunia (superficial/deep): Y/N
+□ Dysmenorrhoea (primary/secondary): Y/N
+□ Fever / rigors: Y/N   □ Nausea / vomiting: Y/N
+□ Urinary symptoms: dysuria / frequency / haematuria
+□ PR bleeding / change in bowel habit: Y/N
+□ Shoulder tip pain: Y/N
+
+GYNAECOLOGICAL HISTORY:
+Previous pregnancies (G___P___) / previous ectopic: Y/N
+Previous STI / PID: Y/N   Last smear: ___
+Known endometriosis / PCOS / fibroids / ovarian cysts: Y/N
+Recent gynaecological procedure: Y/N
+
+PMHx: IBD / appendicitis / ovarian pathology / previous abdominal surgery (adhesions)
+Medications: OCP / COCP / POP / IUD / IUS / Depo
+
+EXAMINATION:
+HR: ___  BP: ___/___  Temp: ___  SpO2: ___%
+Abdomen: tenderness / guarding / rebound / mass
+Bimanual: cervical excitation (PID/ectopic): Y/N
+  Adnexal tenderness: Y/N — R/L   Cervical os: open/closed
+  Uterus: size / tenderness   Adnexal mass: Y/N
+Speculum: cervical appearance / discharge / os
+
+INVESTIGATIONS:
+BHCG (if any doubt) — stat
+Pelvic USS (transvaginal — gold standard for ectopic)
+Urine dip   MSU   HVS / endocervical swab (Chlamydia / Gonorrhoea NAAT)
+FBC / CRP / U&E / G&S (if haemodynamically unstable or surgical option)
+
+IMPRESSION:
+BHCG: ___ positive/negative   USS finding: ___
+Most likely: ectopic / miscarriage / PID / ovarian cyst / endometriosis / appendicitis / UTI
+Surgical emergency: Y/N
+</pre></div></div>
+</div>
+<div id="pl-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Ruptured ectopic: haemodynamic compromise → O negative blood, theatres, urgent gynaecology</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Ectopic Pregnancy</h4>
+<ul><li>Unstable: immediate theatres. 2 large-bore IVs, O-negative blood, gynaecology emergency call.</li>
+<li>Stable: gynaecology referral same day. TVS + serial BHCG. Options: expectant / methotrexate / surgical.</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>PID (BASHH Guidelines)</h4>
+<ul><li>Outpatient (mild-moderate): <span class="drug">Ceftriaxone 500mg IM stat</span> + <span class="drug">Doxycycline 100mg PO BD × 14 days</span> + <span class="drug">Metronidazole 400mg PO BD × 14 days</span></li>
+<li>Inpatient (severe/pregnant/failed oral): <span class="drug">Cefoxitin 2g IV QDS</span> + <span class="drug">Doxycycline 100mg IV/PO BD</span> + <span class="drug">Metronidazole 500mg IV TDS</span></li>
+<li>Test and treat partner. Screen for Chlamydia/Gonorrhoea.</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Ovarian Cyst (Torsion)</h4>
+<ul><li>Sudden onset unilateral pain + USS = torsion until proven otherwise → urgent gynaecology (time-critical for ovarian salvage)</li>
+<li>Analgesia: <span class="drug">IV morphine</span> + <span class="drug">metoclopramide 10mg IV</span></li></ul></div></div>
+</div>
+</div>
+
+<!-- BACK PAIN -->
+<div id="p-backpain" class="hidden">
+<div class="ph"><h2>Back Pain</h2><div class="tags"><span class="tag t-r">EXCLUDE CAUDA EQUINA / AAA</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'bp-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'bp-mgmt')">💊 Management</div>
+</div>
+<div id="bp-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-bp')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-bp">BACK PAIN ASSESSMENT
+=====================
+CAUDA EQUINA SYNDROME — MUST EXCLUDE IN ALL BACK PAIN:
+□ Saddle anaesthesia (perianal / inner thigh numbness): Y/N
+□ Bladder dysfunction (retention / incontinence): Y/N — last void: ___
+□ Bowel dysfunction (incontinence / retention): Y/N
+□ Bilateral leg weakness / sciatica: Y/N
+□ Sexual dysfunction: Y/N
+→ ANY positive = MRI spine same-day emergency. Neurosurgery referral.
+
+AAA RED FLAGS:
+□ Age &gt;60 + sudden severe back/abdominal/flank pain: Y/N
+□ Known AAA: Y/N   □ Haemodynamic instability: Y/N
+□ Pulsatile abdominal mass: Y/N
+→ AAA until proven otherwise — bedside USS or CT aortogram
+
+CHARACTERISATION:
+Site: cervical / thoracic / lumbar / sacral
+Onset: sudden / gradual / after trauma — duration: ___
+Character: sharp / dull / aching / radiating
+Radiation: leg / groin / anterior thigh / buttock — side: L/R
+Severity: ___/10
+Exacerbating: movement / coughing / sneezing / Valsalva (disc) / lying (rest pain = malignancy/infection)
+Relieving: rest / analgesia / position
+
+RED FLAGS (NICE — "Spinal Stenosis/Malignancy"):
+□ Age &lt;20 or onset &gt;55 — new back pain
+□ Night pain / rest pain / waking from sleep
+□ Thoracic back pain
+□ History of malignancy   □ Systemic steroids   □ HIV / IVDU
+□ Unexplained weight loss
+□ Structural deformity
+→ Any red flag = imaging required
+
+NEUROLOGICAL ASSESSMENT:
+Leg weakness: Y/N — bilateral/unilateral
+Dermatomal sensory loss: Y/N — level: ___
+Reflexes: knee jerks ___  ankle jerks ___  plantar ___
+Straight leg raise: L ___°  R ___°  (positive if &lt;60° reproduces leg pain = radiculopathy)
+Power: hip flexion / knee extension / ankle dorsiflexion / plantar flexion ___/5
+
+PMHx: malignancy / osteoporosis / previous spinal surgery / inflammatory arthritis (ankylosing spondylitis — morning stiffness &gt;30min)
+Meds: steroids (vertebral fracture risk) / anticoagulants (epidural haematoma)
+
+IMPRESSION:
+Red flags: Y/N   Cauda equina: Y/N   AAA risk: Y/N
+Most likely: mechanical / discogenic / radiculopathy / spinal stenosis / malignancy / infection / fracture
+</pre></div></div>
+</div>
+<div id="bp-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Cauda equina syndrome: MRI spine emergency (same-day). Neurosurgery referral. Do not discharge.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Mechanical Low Back Pain</h4>
+<ul><li>Analgesia: <span class="drug">Paracetamol 1g QDS PO</span> + <span class="drug">Ibuprofen 400mg TDS PO</span> (with food, avoid if CKD/peptic ulcer)</li>
+<li>Consider: <span class="drug">Diazepam 2mg TDS PO</span> short-course (muscle spasm)</li>
+<li>Active mobilisation — advise to stay active, not bed rest</li>
+<li>GP follow-up. Physio referral. No imaging if no red flags.</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Vertebral Fracture (Osteoporotic / Trauma)</h4>
+<ul><li>Plain X-ray spine. If neurological deficit: MRI spine.</li>
+<li>Analgesia. Refer to orthopaedics or neurosurgery if cord compression.</li>
+<li>Assess bone health: DEXA scan, vitamin D, bisphosphonate (via GP)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Spinal Infection (Discitis / Epidural Abscess)</h4>
+<ul><li>MRI spine with contrast urgently</li>
+<li>Blood cultures × 2 before antibiotics if stable</li>
+<li><span class="drug">Flucloxacillin 2g IV QDS</span> (empirical — adjust to cultures). If MRSA risk: vancomycin.</li>
+<li>Neurosurgery referral if cord compression</li></ul></div></div>
+</div>
+</div>
+
+<!-- VAGINAL BLEEDING -->
+<div id="p-pvb" class="hidden">
+<div class="ph"><h2>Vaginal Bleeding (PV Bleeding)</h2><div class="tags"><span class="tag t-r">EXCLUDE ECTOPIC</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'vb-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'vb-mgmt')">💊 Management</div>
+</div>
+<div id="vb-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-vb')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-vb">PV BLEEDING ASSESSMENT
+=======================
+⚠️ BHCG IMMEDIATELY — all women of childbearing age
+BHCG: ___  Gestation (if pregnant): ___weeks  USS: ___
+
+CHARACTERISATION:
+LMP: ___ (date)   Regular cycles: Y/N   Cycle length: ___   Usual flow: light/moderate/heavy
+Nature of bleeding: spotting / light / moderate / heavy
+Duration: ___   Clots: Y/N — size: ___
+Associated pain: Y/N — site/character (cramping = miscarriage): ___
+Offensive odour (infection): Y/N
+
+IF PREGNANT / POSSIBLE PREGNANCY:
+□ Intrauterine pregnancy confirmed on USS: Y/N
+□ Shoulder tip pain (ectopic / haemoperitoneum): Y/N
+□ Products of conception passed: Y/N
+□ Cervical os: open / closed (on speculum/bimanual)
+
+MISCARRIAGE CLASSIFICATION:
+Threatened: BHCG+, IUP on USS, os closed, bleeding light
+Inevitable: os open, bleeding, IUP on USS or products felt
+Incomplete: products partially expelled, os open
+Complete: products fully expelled, os closed, empty uterus on USS
+Missed: fetal demise without expulsion (no fetal heart on USS)
+
+NON-PREGNANT PV BLEEDING:
+Menorrhagia (heavy menstrual bleeding):
+□ Soaking through &gt;1 pad/hour / flooding / clots &gt;2.5cm / duration &gt;7 days
+Intermenstrual bleeding: Y/N   Post-coital bleeding: Y/N
+Post-menopausal bleeding: Y/N (age: ___ — endometrial cancer until proven otherwise)
+Pattern: regular / irregular
+
+ASSOCIATED SYMPTOMS:
+□ Pelvic pain / dysmenorrhoea / dyspareunia
+□ Vaginal discharge (colour / odour)
+□ Urinary symptoms
+□ Haemodynamic instability: Y/N
+
+PMHx: known fibroids / endometriosis / PCOS / endometrial pathology / malignancy / bleeding disorder
+Meds: OCP / HRT / anticoagulants / aspirin
+Smear history: up-to-date Y/N / last: ___
+
+EXAMINATION:
+HR: ___  BP: ___/___  (postural drop: Y/N)  SpO2: ___%
+Pallor: Y/N   Haemodynamic compromise: Y/N
+Abdomen: tenderness / guarding (ectopic/PID)
+Speculum: cervical os (open/closed) / bleeding source / cervical lesion / products visible
+Bimanual: uterine size / tenderness / adnexal mass / cervical excitation
+
+IMPRESSION:
+BHCG: ___  Gestation: ___  USS: ___
+Most likely: threatened/inevitable/incomplete/missed miscarriage / ectopic / menorrhagia / malignancy
+Haemodynamically stable: Y/N
+</pre></div></div>
+</div>
+<div id="vb-mgmt" class="tc">
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Ectopic / Haemodynamic Instability</h4>
+<ul><li>2 large-bore IV cannulae, fluid resuscitation, O-negative blood</li>
+<li>Urgent gynaecology / theatres referral</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Miscarriage</h4>
+<ul><li>Anti-D immunoglobulin if Rhesus negative (250 IU if &lt;20wks, 500 IU if &gt;20wks)</li>
+<li>Threatened: expectant management, early pregnancy unit (EPU) follow-up, USS in 1-2 weeks</li>
+<li>Incomplete/inevitable: gynaecology referral — surgical/medical/expectant management</li>
+<li>Analgesia: <span class="drug">Paracetamol 1g PO</span> ± <span class="drug">Ibuprofen 400mg PO</span>. Emotional support.</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Post-Menopausal Bleeding</h4>
+<ul><li>All PMB = endometrial cancer until proven otherwise — refer via 2-week wait (2WW) pathway</li>
+<li>TVS + endometrial biopsy (pipelle) arranged via gynaecology</li></ul></div></div>
+</div>
+</div>
+
+<!-- RED EYE -->
+<div id="p-redeye" class="hidden">
+<div class="ph"><h2>Red Eye</h2><div class="tags"><span class="tag t-o">DON'T MISS ACUTE GLAUCOMA</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'re-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'re-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'re-mgmt')">💊 Management</div>
+</div>
+<div id="re-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-re')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-re">RED EYE ASSESSMENT
+===================
+PRESENTING COMPLAINT: Red eye / painful eye / discharge / visual change
+
+ACUTE ANGLE-CLOSURE GLAUCOMA — SCREEN FIRST:
+□ Severe eye pain: Y/N   □ Halos around lights: Y/N
+□ Reduced vision: Y/N   □ Nausea / vomiting: Y/N
+□ Fixed mid-dilated pupil: Y/N   □ Hazy/steamy cornea: Y/N
+□ Rock-hard eyeball on palpation: Y/N
+→ ANY positive = ophthalmology emergency immediately. Measure IOP if tonometer available.
+
+CHARACTERISATION:
+Onset: sudden / gradual   Duration: ___   Unilateral / bilateral
+Pain: Y/N — severity: ___/10 — character: aching / sharp / foreign body sensation / photophobia
+Visual acuity: R ___  L ___  (with glasses/pinhole correction)
+Discharge: watery / mucopurulent / purulent — amount: ___
+Photophobia: Y/N   Watering / lacrimation: Y/N
+
+DETAILED HISTORY:
+□ Itching (allergic)   □ Foreign body sensation / FB in eye: Y/N
+□ Contact lens wear: Y/N — type / care / duration worn: ___ (acanthamoeba / pseudomonas risk)
+□ Recent trauma / chemical splash / arc eye: Y/N
+□ Preceding URTI (viral conjunctivitis): Y/N
+□ Recent STI / sexual contact (gonococcal / chlamydial): Y/N
+□ Known glaucoma: Y/N   □ Previous eye surgery: Y/N
+□ Rheumatological disease (uveitis in ankylosing spondylitis / IBD / sarcoid): Y/N
+□ Skin rash / vesicles around eye (herpes zoster ophthalmicus — V1 distribution): Y/N
+
+PMHx: glaucoma / uveitis / previous corneal disease / diabetes (poor healing) / atopy
+Meds: pilocarpine / beta-blocker eye drops / steroids
+
+EXAMINATION:
+Visual acuity: R: ___  L: ___ (use Snellen chart / phone app)
+Pupils: PEARL / shape / consensual reflex / mid-dilated fixed (acute glaucoma)
+Conjunctiva: ciliary flush (circumcorneal redness = iritis/glaucoma) / diffuse redness (conjunctivitis)
+Cornea: clear / hazy / FB / dendritic ulcer (fluorescein — herpes simplex) / arc burns
+Anterior chamber: deep / shallow / hypopyon (pus layer — severe iritis/infection)
+Eyelids: crusting / swelling / vesicles / chalazion / hordeolum
+Fundoscopy: optic disc (cupping in glaucoma) / retinal changes
+
+IMPRESSION:
+Most likely: conjunctivitis / corneal abrasion / iritis / acute glaucoma / herpes / scleritis
+Sight-threatening: Y/N
+</pre></div></div>
+</div>
+<div id="re-diff" class="tc">
+<table><tr><th>Diagnosis</th><th>Pain</th><th>Vision</th><th>Pupil</th><th>Key Feature</th></tr>
+<tr><td>Conjunctivitis (viral/bacterial)</td><td>Irritation</td><td>Normal</td><td>Normal</td><td>Discharge, bilateral, URTI</td></tr>
+<tr><td>Allergic conjunctivitis</td><td>Itch</td><td>Normal</td><td>Normal</td><td>Bilateral, seasonal, atopic</td></tr>
+<tr><td>Corneal abrasion/FB</td><td>Severe</td><td>Normal/reduced</td><td>Normal</td><td>FB sensation, trauma, fluorescein staining</td></tr>
+<tr><td>Iritis / anterior uveitis</td><td>Moderate</td><td>Reduced</td><td>Constricted/irregular</td><td>Ciliary flush, photophobia, rheumatological</td></tr>
+<tr><td>Acute angle-closure glaucoma</td><td>Severe</td><td>Reduced</td><td>Fixed mid-dilated</td><td>Halos, N&V, hard eye, hazy cornea</td></tr>
+<tr><td>Herpes simplex keratitis</td><td>Moderate</td><td>Reduced</td><td>Normal</td><td>Dendritic ulcer on fluorescein, recurrent</td></tr>
+<tr><td>Herpes zoster ophthalmicus</td><td>Severe</td><td>At risk</td><td>Variable</td><td>V1 dermatomal vesicles (tip of nose = Hutchinson's)</td></tr>
+<tr><td>Scleritis</td><td>Severe boring</td><td>Normal</td><td>Normal</td><td>Deep red/purple, tender, rheumatological</td></tr>
+<tr><td>Gonococcal conjunctivitis</td><td>Moderate</td><td>At risk</td><td>Normal</td><td>Hyperpurulent, rapid onset</td></tr>
+</table>
+</div>
+<div id="re-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Acute angle-closure glaucoma: Ophthalmology EMERGENCY. IOP can exceed 50mmHg — causes permanent blindness within hours.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Acute Angle-Closure Glaucoma</h4>
+<ul><li><span class="drug">Pilocarpine 2% eye drops 1 drop q15 min × 4</span> (constricts pupil, opens drainage angle)</li>
+<li><span class="drug">Timolol 0.5% eye drops 1 drop</span> (reduces aqueous production)</li>
+<li><span class="drug">Acetazolamide 500mg IV</span> (reduces aqueous production) or 500mg PO if mild</li>
+<li>Ophthalmology emergency referral. Definitive: laser peripheral iridotomy.</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Corneal Abrasion / FB</h4>
+<ul><li>Fluorescein staining + Wood's lamp / slit lamp</li>
+<li>Remove FB with needle (slit lamp) or irrigation for chemical splash</li>
+<li><span class="drug">Chloramphenicol 0.5% eye drops QDS × 5 days</span></li>
+<li>Cyclopentolate (cycloplegic) if significant pain. Eye padding generally not recommended.</li>
+<li>Arc eye (UV keratitis): same + <span class="drug">tetracaine short-term analgesia</span></li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Infective Conjunctivitis</h4>
+<ul><li>Viral (adenovirus, commonest): supportive. Warn highly contagious. No antibiotics needed.</li>
+<li>Bacterial: <span class="drug">Chloramphenicol 0.5% drops QDS × 5 days</span></li>
+<li>Contact lens wearers: <span class="drug">Ciprofloxacin 0.3% drops</span> (pseudomonas cover). Stop lenses.</li>
+<li>Gonococcal: urgent ophthalmology + <span class="drug">Ceftriaxone 1g IM single dose</span> + <span class="drug">Azithromycin 1g PO</span></li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Herpes Simplex Keratitis</h4>
+<ul><li><span class="drug">Aciclovir 3% eye ointment 5× daily × 10 days</span></li>
+<li>Do NOT give topical steroids (worsen HSV)</li>
+<li>Ophthalmology review</li></ul></div></div>
+<div class="mstep"><div class="sn">5</div><div class="sc"><h4>Iritis / Anterior Uveitis</h4>
+<ul><li><span class="drug">Prednisolone 1% eye drops hourly</span> + <span class="drug">Cyclopentolate 1% TDS</span> (cycloplegic — reduces pain and prevents synechiae)</li>
+<li>Ophthalmology same-day referral. Investigate for underlying cause.</li></ul></div></div>
+</div>
+</div>
+
+<!-- JOINTS -->
+<div id="p-joints" class="hidden">
+<div class="ph"><h2>Mono/Polyarthritis</h2><div class="tags"><span class="tag t-r">EXCLUDE SEPTIC ARTHRITIS</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'jo-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'jo-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'jo-mgmt')">💊 Management</div>
+</div>
+<div id="jo-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-jo')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-jo">JOINT ASSESSMENT
+=================
+SEPTIC ARTHRITIS — MUST EXCLUDE:
+□ Single hot swollen joint + fever: Y/N
+□ Unable to weight-bear / move joint: Y/N
+□ Immunocompromised / prosthetic joint: Y/N
+□ Recent joint injection / surgery: Y/N
+→ Joint aspiration urgently — send for MC&S, crystals, cell count, glucose, protein
+
+CHARACTERISATION:
+Joint(s) affected: ___   Mono (1) / Oligo (2-4) / Poly (&gt;4)
+Onset: sudden (gout/pseudogout/septic) / gradual (days/weeks = inflammatory)
+Duration: ___   First episode / recurrent
+Symmetrical: Y/N   Migratory: Y/N (reactive arthritis / gonococcal)
+Time of day: worst on waking (inflammatory — morning stiffness &gt;30 min) / end of day (mechanical/OA)
+Morning stiffness: ___min (&gt;30 = inflammatory; &lt;30 = mechanical)
+
+ASSOCIATED FEATURES:
+□ Fever / systemic upset / rigors (septic arthritis)
+□ Rash: psoriasis / erythema marginatum / erythema nodosum / keratoderma blennorrhagica / malar
+□ Urethral discharge / dysuria / genital ulcers (reactive arthritis / gonococcal)
+□ Preceding diarrhoeal illness / URTI (reactive arthritis — 1-4 weeks prior)
+□ Eye inflammation (uveitis / conjunctivitis) — HLA-B27 associated
+□ Back pain (ankylosing spondylitis / spondyloarthropathy)
+□ Oral ulcers   □ Raynaud's phenomenon   □ Dry eyes/mouth (Sjögren's)
+□ Previous attacks — same joint: Y/N (gout / pseudogout)
+□ Alcohol / rich diet / seafood / red meat / diuretics (gout risk)
+
+PMHx: gout / rheumatoid / psoriasis / IBD / sarcoid / malignancy / DM / renal disease
+Meds: diuretics (gout) / allopurinol (on it already?) / steroids / DMARDs / biological agents
+Family history: gout / rheumatoid / spondyloarthropathy
+
+EXAMINATION:
+Temp: ___   HR: ___   BP: ___
+Joint(s): swelling / erythema / warmth / deformity / effusion
+Range of movement: active ___  passive ___ (pain at extremes only = mechanical; throughout = inflammatory)
+Unable to bear weight / floated patella test: Y/N
+Tophi (gout): Y/N — ears/olecranon/fingers
+Skin: psoriatic plaques / rash / nodules (rheumatoid)
+Lymph nodes: ___   Uveitis: Y/N
+
+INVESTIGATIONS:
+Joint aspiration (if monoarthritis or suspect infection): 
+  WBC (&gt;50,000 = septic), crystals (urate = gout / calcium pyrophosphate = pseudogout), MC&S, glucose
+FBC / CRP / ESR / U&E / urate / LFTs   Blood cultures × 2
+XR affected joint(s) — baseline   USS (effusion, guided aspiration)
+NAAT swab (gonococcal) if sexually active   RF / anti-CCP / ANA / complement (if polyarthritis)
+
+IMPRESSION:
+Most likely: septic arthritis / gout / pseudogout / reactive / RA flare / OA / other
+Septic arthritis excluded: Y/N
+</pre></div></div>
+</div>
+<div id="jo-diff" class="tc">
+<table><tr><th>Diagnosis</th><th>Pattern</th><th>Key Features</th></tr>
+<tr><td>Septic arthritis</td><td>Mono</td><td>Fever, hot swollen joint, unwell, WBC &gt;50k in aspirate</td></tr>
+<tr><td>Gout</td><td>Mono (MTP1 classic)</td><td>Sudden, very painful, urate crystals (negatively birefringent), alcohol/diuretics</td></tr>
+<tr><td>Pseudogout (CPPD)</td><td>Mono (knee, wrist)</td><td>Elderly, calcium pyrophosphate crystals (positively birefringent), chondrocalcinosis on XR</td></tr>
+<tr><td>Reactive arthritis</td><td>Oligo, asymmetric</td><td>Post-infective (GI/STI), HLA-B27, urethritis, uveitis (Reiter's triad)</td></tr>
+<tr><td>Rheumatoid arthritis</td><td>Symmetric poly</td><td>Small joints hands/feet, morning stiffness &gt;1h, RF/anti-CCP positive</td></tr>
+<tr><td>Ankylosing spondylitis</td><td>Axial + oligo</td><td>Young male, sacroiliitis, morning back stiffness, HLA-B27</td></tr>
+<tr><td>OA</td><td>Mono/oligo</td><td>Older, large joints, Heberden's/Bouchard's nodes, worse end of day</td></tr>
+<tr><td>Gonococcal</td><td>Migratory poly → mono</td><td>Young sexually active, urethral discharge, skin lesions, tenosynovitis</td></tr>
+</table>
+</div>
+<div id="jo-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Septic arthritis: joint washout within hours. Start antibiotics only AFTER aspiration (don't delay washout for cultures).</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Septic Arthritis</h4>
+<ul><li>Aspiration immediately (diagnostic + therapeutic)</li>
+<li><span class="drug">Flucloxacillin 2g IV QDS</span> (empirical Staph aureus cover)</li>
+<li>If MRSA risk / prosthetic joint: <span class="drug">Vancomycin IV</span> (weight/renal function-based dosing)</li>
+<li>Gonococcal: <span class="drug">Ceftriaxone 1g IV/IM OD</span></li>
+<li>Orthopaedic referral for joint washout (arthroscopy). Do not weight bear.</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Gout</h4>
+<ul><li><span class="drug">Naproxen 500mg BD PO</span> (or <span class="drug">Indomethacin 50mg TDS</span>) with PPI cover</li>
+<li>If NSAIDs contraindicated: <span class="drug">Colchicine 500mcg 2-4× daily</span> (reduce if CKD)</li>
+<li>Or <span class="drug">Prednisolone 30-40mg OD PO</span> tapering course (if NSAIDs and colchicine both contraindicated)</li>
+<li>Do NOT start allopurinol during acute attack. Review urate-lowering therapy via GP 4-6 weeks post-attack.</li></ul></div></div>
+</div>
+</div>
+
+<!-- ANAPHYLAXIS -->
+<div id="p-anaphylaxis" class="hidden">
+<div class="ph"><h2>Anaphylaxis</h2><div class="tags"><span class="tag t-r">LIFE-THREATENING EMERGENCY</span><span class="tag t-b">RCUK Guidelines</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'an-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'an-mgmt')">💊 Management</div>
+</div>
+<div id="an-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-an')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-an">ANAPHYLAXIS ASSESSMENT
+=======================
+DIAGNOSTIC CRITERIA (likely anaphylaxis if any of the following):
+Criterion 1: Sudden onset + skin/mucosal changes + ONE of: airway compromise / hypotension / end-organ dysfunction
+Criterion 2: Rapid onset TWO or more of: skin/mucosal / airway / hypotension / GI symptoms after likely allergen exposure
+Criterion 3: Hypotension after known allergen (SBP &lt;90 or &gt;30% fall from baseline)
+
+TRIGGER IDENTIFICATION:
+□ Food: nuts / shellfish / fish / egg / milk / wheat — consumed within 30 min-2h: ___
+□ Drug: antibiotic / NSAID / aspirin / contrast / anaesthetic — given at: ___
+□ Insect sting: wasp / bee — time: ___
+□ Latex exposure: Y/N
+□ Exercise-induced: Y/N
+□ Idiopathic: Y/N (previous episodes without identified trigger)
+
+FEATURES (tick all present):
+SKIN/MUCOSAL:
+□ Urticaria (hives) — distribution: ___
+□ Angioedema — lips / face / tongue / throat: ___
+□ Flushing / erythema   □ Pruritus
+
+AIRWAY:
+□ Hoarseness   □ Stridor   □ Throat tightening
+□ Difficulty swallowing   □ Drooling
+
+BREATHING:
+□ Wheeze / bronchospasm   □ Dyspnoea   □ SpO2: ___%
+
+CIRCULATION:
+□ Hypotension (SBP &lt;90mmHg)   HR: ___  BP: ___/___
+□ Syncope / collapse   □ Pale / diaphoretic
+
+GI:
+□ Nausea / vomiting   □ Abdominal cramps / diarrhoea
+
+CNS:
+□ Confusion / altered consciousness   GCS: ___
+
+PMHx: previous anaphylaxis / known allergies / asthma (risk of severe reaction)
+Meds: adrenaline auto-injector (EpiPen) carried: Y/N — used: Y/N / beta-blockers (risk factor for severe/refractory)
+
+TIME OF ONSET: ___   TIME OF ADRENALINE (if given): ___
+
+IMPRESSION:
+Anaphylaxis confirmed: Y/N   Trigger identified: ___
+Severity: mild / moderate / severe (airway/cardiovascular compromise)
+</pre></div></div>
+</div>
+<div id="an-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Adrenaline FIRST — do not delay for antihistamines or steroids. Lie patient flat + legs elevated (unless airway compromise). Call for help.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>IMMEDIATE — Adrenaline (RCUK)</h4>
+<ul><li><span class="drug">Adrenaline (epinephrine) 500mcg (0.5ml of 1:1000) IM — anterolateral mid-thigh</span></li>
+<li>Can repeat every 5 minutes if no improvement</li>
+<li>IV adrenaline ONLY by experienced clinician if no IM response and cardiac arrest imminent</li>
+<li>Position: flat + legs elevated (unless respiratory compromise — sit up)</li>
+<li>High-flow O₂, IV access × 2, 500ml-1L crystalloid bolus if hypotensive</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Second-Line (after adrenaline)</h4>
+<ul><li><span class="drug">Chlorphenamine 10mg IV/IM</span> (antihistamine — H1)</li>
+<li><span class="drug">Hydrocortisone 200mg IV</span> (reduces late-phase reaction, biphasic reaction risk)</li>
+<li>Bronchospasm: <span class="drug">Salbutamol 5mg nebulised</span></li>
+<li>Refractory hypotension: <span class="drug">IV adrenaline infusion</span> (ITU-level) or <span class="drug">glucagon 1-2mg IV</span> (if on beta-blockers)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Post-Anaphylaxis</h4>
+<ul><li>Observe minimum 6-12h (biphasic risk). Admit if: severe / asthmatic / unreliable access to emergency services.</li>
+<li>Mast cell tryptase: at time of event, 1-2h post, 24h (baseline) — three samples for confirmation</li>
+<li>Discharge: 2× EpiPen prescribed + training. Allergy clinic referral. MedicAlert bracelet.</li>
+<li>Avoid trigger. Written anaphylaxis action plan.</li></ul></div></div>
+</div>
+</div>
+
+<!-- ASTHMA -->
+<div id="p-asthma" class="hidden">
+<div class="ph"><h2>Acute Asthma</h2><div class="tags"><span class="tag t-r">BTS/SIGN Guideline</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'as-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'as-mgmt')">💊 BTS/SIGN Management</div>
+</div>
+<div id="as-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-as')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-as">ACUTE ASTHMA ASSESSMENT
+========================
+SEVERITY CLASSIFICATION (BTS/SIGN):
+Moderate: PEFR 50-75% best/predicted, no features of severe
+Severe: PEFR 33-50% / RR≥25 / HR≥110 / inability to complete sentences
+Life-threatening: PEFR &lt;33% / SpO2 &lt;92% / silent chest / cyanosis / poor resp effort / altered consciousness / hypotension / exhaustion
+Near-fatal: raised pCO2 / requiring mechanical ventilation
+
+PEFR: ___ L/min   Best/predicted: ___   % best: ___%
+SpO2: ___%   RR: ___   HR: ___   BP: ___/___   GCS: ___
+
+SYMPTOMS:
+Onset: ___   Duration of this attack: ___
+Trigger: infection / allergen / cold air / exercise / NSAIDs / emotional stress / unknown: ___
+Response to own bronchodilator (salbutamol puffs taken at home): ___
+
+MARKERS OF SEVERE DISEASE / RISK OF FATAL ASTHMA:
+□ Previous life-threatening attack / ICU admission / intubation
+□ ≥2 hospitalisations / ≥3 ED visits in last year
+□ Use of ≥3 short-acting beta-agonist inhalers/month
+□ Current / recent course of oral steroids
+□ Poor adherence to ICS   □ Brittle asthma
+□ Psychosocial factors / substance misuse
+□ Allergy to mould / peanut / latex
+
+PMHx: known asthma (duration) / eczema / allergic rhinitis / nasal polyps / previous ICU admission
+Medications: relievers (SABA frequency) / preventers (ICS / LABA / montelukast / biologics) / OCS
+
+EXAMINATION:
+Silent chest: Y/N   Wheeze: Y/N — pitch: ___   Cyanosis: Y/N
+Accessory muscle use: Y/N   Tracheal tug: Y/N   Paradoxical respiration: Y/N
+Bilateral air entry: Y/N   Pneumothorax signs: Y/N (complication)
+
+IMPRESSION:
+Severity: moderate / severe / life-threatening / near-fatal
+</pre></div></div>
+</div>
+<div id="as-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Silent chest = life-threatening. Call anaesthetics for airway. Do not sedate — worsens respiratory depression.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>All Acute Asthma</h4>
+<ul><li>Sit upright. High-flow O₂ to maintain SpO₂ 94-98%.</li>
+<li><span class="drug">Salbutamol 5mg nebulised (oxygen-driven)</span> — repeat every 15-20 min (continuous if life-threatening)</li>
+<li><span class="drug">Ipratropium bromide 0.5mg nebulised</span> — add if severe/life-threatening (q4-6h)</li>
+<li><span class="drug">Prednisolone 40-50mg PO OD</span> or <span class="drug">Hydrocortisone 100mg IV QDS</span> if unable to swallow</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Life-Threatening / Poor Response</h4>
+<ul><li><span class="drug">Magnesium sulphate 2g IV over 20 min</span> (single dose — life-threatening or no response to initial treatment)</li>
+<li>IV salbutamol: <span class="drug">250mcg IV slowly</span> (if unable to nebulise) then infusion</li>
+<li>IV aminophylline (specialist): loading 5mg/kg over 20 min (omit if on theophylline)</li>
+<li>Alert anaesthetics for possible intubation (very high-risk — difficult to ventilate asthmatic)</li>
+<li>CXR (exclude pneumothorax), ABG, bloods</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Discharge Criteria</h4>
+<ul><li>PEFR ≥75% best/predicted, SpO₂ ≥94%, stable on 2-4 hourly salbutamol</li>
+<li>Discharge with: SABA reliever, ICS (start/step up), 5-day prednisolone course, written asthma action plan</li>
+<li>GP/respiratory follow-up within 2 working days. Assess trigger and control.</li></ul></div></div>
+</div>
+</div>
+
+<!-- COPD -->
+<div id="p-copd" class="hidden">
+<div class="ph"><h2>AECOPD</h2><div class="tags"><span class="tag t-r">NICE NG115</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'co-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'co-mgmt')">💊 NICE NG115 Management</div>
+</div>
+<div id="co-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-co')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-co">AECOPD ASSESSMENT
+==================
+CHARACTERISATION:
+Baseline exercise tolerance: ___   Baseline O₂ requirement: ___L (home O₂: Y/N)
+FEV1 (if known): ___% predicted   Previous GOLD stage: ___
+Change from baseline: increased dyspnoea / increased sputum volume / change in sputum colour
+Duration of deterioration: ___
+
+TRIGGER:
+□ Infection (viral URTI — commonest / bacterial)
+□ Sputum: colour change to yellow/green (bacterial) / increased volume
+□ Environmental: pollution / cold air / allergen
+□ Non-concordance with medications
+□ Pneumothorax   □ PE   □ Cardiac cause (AF / CCF)
+
+SYMPTOMS:
+□ Dyspnoea — worse than baseline: Y/N
+□ Wheeze   □ Cough — productive: Y/N   Sputum: colour / volume: ___
+□ Fever / chills (infection)   □ Ankle swelling (cor pulmonale)
+□ Confusion (type 2 respiratory failure / CO2 narcosis): Y/N
+
+LIFE-THREATENING FEATURES:
+□ Unable to speak   □ SpO₂ &lt;88% on ≥28% O₂
+□ pH &lt;7.26   □ pCO2 rising   □ Cyanosis   □ GCS &lt;15   □ Haemodynamic compromise
+
+ABG (essential if SpO₂ &lt;92% or severe):
+pH: ___  pO2: ___  pCO2: ___  HCO3: ___  BE: ___  on ___% O₂
+
+PMHx: COPD (duration) / previous hospitalisations / ICU / NIV / intubation / home O₂ / smoking status
+Medications: inhalers / theophylline / steroids / home nebulisers
+
+EXAMINATION:
+SpO₂: ___%  on ___L  RR: ___  HR: ___  BP: ___/___  Temp: ___
+Pursed-lip breathing: Y/N  Accessory muscles: Y/N  Cyanosis: Y/N
+Barrel chest: Y/N  Hyperresonant: Y/N  Wheeze: Y/N  Reduced BS: Y/N
+JVP: ___  Ankle oedema: Y/N (cor pulmonale)
+
+IMPRESSION:
+Severity: mild / moderate / severe / life-threatening
+ABG: type 1 (pO2 low, pCO2 normal/low) / type 2 (pO2 low, pCO2 high, pH low = acidosis) respiratory failure
+Acidotic: Y/N (pH: ___)   NIV candidate: Y/N
+</pre></div></div>
+</div>
+<div id="co-mgmt" class="tc">
+<div class="alert a-y">⚠️ <strong>COPD: target SpO₂ 88-92%. Uncontrolled O₂ causes CO2 retention and respiratory arrest. Check ABG.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Controlled O₂ and Bronchodilators</h4>
+<ul><li>Controlled O₂: 24-28% Venturi mask. Target SpO₂ 88-92%. ABG within 30-60 min.</li>
+<li><span class="drug">Salbutamol 2.5-5mg nebulised</span> (air-driven — not O₂ unless immediately life-threatening)</li>
+<li><span class="drug">Ipratropium 0.5mg nebulised</span> — q4-6h</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Steroids and Antibiotics</h4>
+<ul><li><span class="drug">Prednisolone 30mg PO OD × 5 days</span></li>
+<li>Antibiotics if: purulent sputum / clinical signs of infection / CRP &gt;40:<br>
+  <span class="drug">Amoxicillin 500mg TDS PO × 5 days</span> (or doxycycline / clarithromycin if penicillin allergic)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Type 2 Respiratory Failure (pH &lt;7.35, pCO2 &gt;6)</h4>
+<ul><li>NIV (BiPAP): <span class="drug">starting IPAP 12-15 / EPAP 4-5cmH₂O</span> — titrate to response</li>
+<li>Indications: pH 7.25-7.35 after initial treatment. Do NOT wait for worsening.</li>
+<li>pH &lt;7.25 despite NIV: consider invasive ventilation / palliation (discuss with patient / ITU)</li>
+<li>DNACPR / ceiling of care discussion documented</li></ul></div></div>
+</div>
+</div>
+
+<!-- ACS -->
+<div id="p-acs" class="hidden">
+<div class="ph"><h2>ACS / STEMI</h2><div class="tags"><span class="tag t-r">CATH LAB ACTIVATION</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'ac-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'ac-mgmt')">💊 NICE NG185 Management</div>
+</div>
+<div id="ac-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-ac')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-ac">ACS ASSESSMENT
+===============
+STEMI CRITERIA (any of the following — activate cath lab immediately):
+□ ST elevation ≥1mm in ≥2 contiguous limb leads
+□ ST elevation ≥2mm in ≥2 contiguous chest leads (V1-V6)
+□ New left bundle branch block (LBBB)
+□ Posterior MI: ST depression V1-V3 (= ST elevation on posterior leads)
+□ ST elevation in aVR (= left main / proximal LAD — critical)
+
+SYMPTOM ONSET TIME: ___   Duration: ___
+Pain: character / radiation / associated symptoms → see Chest Pain proforma
+
+CONTRAINDICATIONS TO THROMBOLYSIS (if PPCI unavailable):
+□ Active bleeding / haemorrhagic stroke ever
+□ Ischaemic stroke &lt;3 months   □ Aortic dissection suspected
+□ Severe hypertension &gt;185/110   □ Major surgery/trauma &lt;3 weeks
+□ Intracranial neoplasm
+
+GRACE SCORE VARIABLES (NSTEMI):
+Age: ___   HR: ___   SBP: ___   Cr: ___
+Cardiac arrest at admission: Y/N   ST deviation: Y/N   Elevated troponin: Y/N
+GRACE score: ___ (online calculator) → risk stratification
+
+CARDIAC RISK FACTORS: (as per Chest Pain proforma)
+
+EXAMINATION:
+HR: ___  BP: ___/___ (both arms)  SpO2: ___%  RR: ___
+JVP: ___cm  Murmur: Y/N (MR — papillary muscle rupture complication)
+New murmur: Y/N   Basal creps (pulmonary oedema): Y/N
+Killip class: I (no CCF) / II (creps &lt;50% fields or S3) / III (pulm oedema) / IV (cardiogenic shock)
+</pre></div></div>
+</div>
+<div id="ac-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>STEMI: door-to-balloon &lt;90 min. Dual antiplatelet + anticoagulation before cath lab. Do NOT delay.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>STEMI — Immediate</h4>
+<ul><li><span class="drug">Aspirin 300mg PO</span> + <span class="drug">Ticagrelor 180mg PO</span> (or Clopidogrel 600mg if Ticagrelor contraindicated)</li>
+<li>Anticoagulation: <span class="drug">Unfractionated heparin 5000 units IV bolus</span> (for PPCI)</li>
+<li>GTN spray if SBP &gt;90mmHg. Morphine + metoclopramide for pain/nausea.</li>
+<li>O₂ only if SpO₂ &lt;94%. Cath lab activation.</li>
+<li>Thrombolysis if PPCI unavailable and symptom onset &lt;12h: <span class="drug">Tenecteplase IV</span> (weight-based dosing)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>NSTEMI/UA — Risk Stratification</h4>
+<ul><li><span class="drug">Aspirin 300mg</span> + <span class="drug">Ticagrelor 180mg</span></li>
+<li><span class="drug">Fondaparinux 2.5mg SC</span> (NICE NG185 preferred anticoagulant)</li>
+<li>GRACE score: high (&gt;140) → angiography &lt;24h; intermediate (109-140) → &lt;72h; low (&lt;109) → outpatient</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Cardiogenic Shock (Killip IV)</h4>
+<ul><li>Urgent PPCI. ITU. Inotropic support: <span class="drug">noradrenaline</span> or <span class="drug">dobutamine</span> infusion.</li>
+<li>Consider IABP / Impella device (specialist centre)</li></ul></div></div>
+</div>
+</div>
+
+<!-- CHF -->
+<div id="p-chf" class="hidden">
+<div class="ph"><h2>Acute Heart Failure</h2><div class="tags"><span class="tag t-r">HIGH ACUITY</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'cf-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'cf-mgmt')">💊 Management</div>
+</div>
+<div id="cf-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-cf')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-cf">ACUTE HEART FAILURE ASSESSMENT
+================================
+SYMPTOM ONSET:
+Dyspnoea onset: ___   Exercise tolerance now: ___   Baseline: ___
+Orthopnoea: Y/N — number of pillows: ___   PND: Y/N
+Ankle swelling: bilateral Y/N — duration: ___
+
+PRECIPITATING FACTORS (Failure Is Due To):
+F — Forgot medications (non-compliance)   A — Anaemia / Arrhythmia (AF)
+I — Infection (pneumonia)                  L — Load (excess salt/fluid)
+L — Left ventricular failure (new MI)     U — Uncontrolled hypertension / thyrotoxicosis
+R — Renal failure                          E — Embolism (PE)
+
+FLUID STATUS:
+Weight: ___ kg   Usual weight: ___ kg   Change: ___kg over ___days
+Daily fluid intake: ___   Urine output: ___
+
+PREVIOUS CARDIAC HISTORY:
+Known CCF: Y/N   LVEF (last echo): ___%   CRT device: Y/N
+Previous MI / PCI / CABG: Y/N   Valve disease: Y/N
+Previous decompensations / hospitalisations: ___
+
+MEDICATIONS (compliance / recent changes):
+□ Diuretic (furosemide dose: ___mg) — taken regularly: Y/N
+□ ACEi / ARB   □ Beta-blocker   □ MRA (spironolactone/eplerenone)   □ SGLT2i
+□ New medications (NSAIDs, steroids, calcium channel blockers — can precipitate CCF)
+
+ASSOCIATED:
+□ Palpitations / irregular heartbeat (AF — check ECG)
+□ Chest pain (ACS precipitant): Y/N
+□ Fever / URTI symptoms (infection precipitant): Y/N
+
+EXAMINATION:
+HR: ___  Rhythm: regular/irregular  BP: ___/___  SpO2: ___%  RR: ___  Temp: ___
+JVP: ___cm (elevated in volume overload)   Hepatojugular reflux: Y/N
+Peripheral oedema: bilateral / pitting — to level: knees/thighs/sacrum: ___
+Chest: fine creps — bilateral/basal: ___
+Heart sounds: S3 (gallop) / S4 / murmur (MR/AS — precipitant or consequence)
+Ascites: Y/N   Warm/cool peripheries (cold = low output / warm = high output)
+
+NT-proBNP: ___   Troponin: ___   ECG: ___   CXR: cardiomegaly/upper lobe diversion/bat wing/Kerley B lines
+
+IMPRESSION:
+Acute decompensation: Y/N   Precipitant: ___
+Wet/warm (most common — fluid overload, good output) / Wet/cold (cardiogenic shock — low output)
+</pre></div></div>
+</div>
+<div id="cf-mgmt" class="tc">
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Immediate — LMNOP</h4>
+<ul><li>L — sit upright, legs dependant (reduces preload)</li>
+<li>M — <span class="drug">Morphine 2-5mg IV</span> (anxiolysis/preload reduction — use cautiously, can cause hypotension)</li>
+<li>N — NIV (CPAP 5-10cmH₂O) if SpO₂ &lt;90% on O₂, or severe distress — improves oxygenation, reduces work of breathing, reduces mortality</li>
+<li>O — O₂ to maintain SpO₂ 94-98%</li>
+<li>P — <span class="drug">Furosemide 40-80mg IV</span> (double usual oral dose if already on loop diuretic)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Vasodilators (if SBP &gt;110mmHg)</h4>
+<ul><li><span class="drug">GTN infusion 1-10mg/h IV</span> (or sublingual GTN if IV not available) — reduces afterload and preload</li>
+<li>Titrate to BP. Stop if SBP &lt;90mmHg.</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Cardiogenic Shock (cold + wet)</h4>
+<ul><li>DO NOT give diuretics without haemodynamic assessment</li>
+<li>Inotropes: <span class="drug">Dobutamine infusion 2.5-20 mcg/kg/min</span></li>
+<li>ITU referral. Treat precipitant (ACS → PPCI, arrhythmia → cardioversion).</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Monitoring</h4>
+<ul><li>Strict fluid balance, daily weight, urine output (catheterise)</li>
+<li>Monitor U&E q24-48h (furosemide causes K+ loss — replace)</li>
+<li>Cardiology referral. Optimise GDMT at discharge.</li></ul></div></div>
+</div>
+</div>
+
+<!-- DVT/PE -->
+<div id="p-dvtpe" class="hidden">
+<div class="ph"><h2>DVT / PE</h2><div class="tags"><span class="tag t-r">NICE NG158</span><span class="tag t-b">YEARS Algorithm</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'dp-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'dp-mgmt')">💊 NICE NG158 Management</div>
+</div>
+<div id="dp-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-dp')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-dp">DVT / PE ASSESSMENT
+====================
+MASSIVE PE RED FLAGS (haemodynamic compromise):
+□ SBP &lt;90mmHg or drop &gt;40mmHg for &gt;15 min not due to arrhythmia/hypovolaemia
+□ Cardiac arrest / cardiogenic shock / syncope
+→ Consider systemic thrombolysis (see management)
+
+SYMPTOMS:
+Dyspnoea: Y/N   Onset: ___   Pleuritic chest pain: Y/N
+Haemoptysis: Y/N   Syncope/presyncope: Y/N
+Leg pain / swelling: Y/N — R/L   Asymmetry: Y/N   Calf tenderness: Y/N   Pitting oedema: Y/N
+
+VTE RISK FACTORS:
+□ Recent surgery (within 3 months) — type: ___
+□ Immobility (&gt;3 days bed rest / long-haul flight/journey &gt;4h)
+□ Malignancy (active / treated) — type: ___
+□ Previous VTE: Y/N   □ Thrombophilia: Y/N (factor V Leiden / antiphospholipid)
+□ OCP / HRT / SERM (tamoxifen): Y/N
+□ Pregnancy / postpartum (&lt;6 weeks): Y/N
+□ Dehydration   □ Obesity (BMI &gt;30)   □ Varicose veins with phlebitis
+□ Lower limb trauma / fracture   □ Smoking
+
+WELLS SCORE FOR DVT:
+□ Active malignancy: +1   □ Paralysis/plaster cast: +1   □ Bedridden &gt;3 days/major surgery &lt;12wks: +1
+□ Local tenderness along deep venous system: +1   □ Entire leg swollen: +1
+□ Calf swelling &gt;3cm compared to other leg: +1   □ Pitting oedema (symptomatic leg): +1
+□ Collateral superficial veins: +1   □ Alternative diagnosis as likely or more likely: -2
+Wells DVT: ___  [≤1 = low; ≥2 = DVT likely → USS]
+
+YEARS ALGORITHM (for PE):
+□ Clinical signs of DVT: Y/N (+1)
+□ PE most likely diagnosis or equally likely: Y/N (+1)
+□ Haemoptysis: Y/N (+1)
+YEARS items: ___   D-dimer: ___ mg/L
+  0 items + D-dimer &lt;1000 = PE excluded
+  1+ items + D-dimer &lt;500 = PE excluded
+  Otherwise: CTPA
+
+sPESI SCORE (severity / safe for outpatient):
+Age &gt;80: +1  Cancer: +1  Cardiopulmonary disease: +1  HR ≥110: +1  SBP &lt;100: +1  SpO₂ &lt;90%: +1
+sPESI: ___  [0 = low risk, outpatient treatment possible; ≥1 = high risk, admit]
+
+EXAMINATION:
+HR: ___  BP: ___/___  SpO2: ___%  RR: ___  Temp: ___
+Leg: circumference at 10cm below tibial tuberosity R/L: ___/___cm (if difference &gt;3cm = significant)
+Homan's sign: NOT RECOMMENDED (insensitive/nonspecific)
+JVP: ___  RV heave: Y/N  Loud P2: Y/N  (signs of right heart strain)
+
+ECG: sinus tachycardia (commonest) / S1Q3T3 / new RBBB / T inversion V1-V4 / AF
+
+IMPRESSION:
+DVT: Wells ___  USS result: ___
+PE: YEARS ___  D-dimer: ___  sPESI: ___  CTPA: ___
+Haemodynamic compromise: Y/N
+</pre></div></div>
+</div>
+<div id="dp-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Massive PE with cardiac arrest: thrombolysis (Alteplase 50mg IV bolus). Continue CPR 60-90 min post-thrombolysis.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>DVT — Treatment</h4>
+<ul><li>Proximal DVT (popliteal or above): anticoagulate immediately</li>
+<li>First-line: <span class="drug">Apixaban 10mg BD × 7 days, then 5mg BD</span> (NICE preferred DOAC)</li>
+<li>Or <span class="drug">Rivaroxaban 15mg BD × 21 days, then 20mg OD</span></li>
+<li>Or bridging LMWH (enoxaparin 1.5mg/kg OD) → warfarin (INR 2-3) if DOACs not suitable</li>
+<li>Duration: provoked (3 months), unprovoked (6 months minimum — discuss extended treatment)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>PE — Stable (sPESI 0)</h4>
+<ul><li>DOAC as above (same dosing as DVT)</li>
+<li>sPESI 0 + no other concerns: consider outpatient treatment (NICE NG158)</li>
+<li>Admit if: sPESI ≥1, bilateral PE, right heart strain on CTPA/echo, significant comorbidities</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Massive PE — Haemodynamic Compromise</h4>
+<ul><li>Systemic thrombolysis: <span class="drug">Alteplase 100mg IV over 2h</span> (or 50mg bolus if cardiac arrest)</li>
+<li>Anticoagulate with UFH: <span class="drug">5000 units IV bolus</span> then infusion (hold during thrombolysis, restart after)</li>
+<li>Catheter-directed thrombolysis / surgical embolectomy (specialist centres)</li>
+<li>Contraindications to thrombolysis: recent stroke, major surgery, active bleeding → surgical embolectomy</li></ul></div></div>
+</div>
+</div>
+
+<!-- STROKE/TIA -->
+<div id="p-stroke" class="hidden">
+<div class="ph"><h2>Stroke / TIA</h2><div class="tags"><span class="tag t-r">NICE NG128</span><span class="tag t-b">ROSIER / ABCD²</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'st-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'st-mgmt')">💊 NICE NG128 Management</div>
+</div>
+<div id="st-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-st')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-st">STROKE / TIA ASSESSMENT
+========================
+TIME IS BRAIN — 1.9 million neurons die per minute during ischaemic stroke
+
+LAST KNOWN WELL (LKW): ___   Time symptoms noticed: ___   Time now: ___
+Time from LKW to now: ___h ___min   Within thrombolysis window (&lt;4.5h): Y/N
+Within thrombectomy window (&lt;24h in selected patients): Y/N
+
+FAST SCREEN:
+F — Face drooping: Y/N   A — Arm weakness: Y/N   S — Speech difficulty: Y/N   T — Time: ___
+
+ROSIER SCORE (stroke vs mimics):
+□ Loss of consciousness or syncope: -1
+□ Seizure activity: -1
+□ Asymmetric facial weakness: +1
+□ Asymmetric arm weakness: +1
+□ Asymmetric leg weakness: +1
+□ Speech disturbance: +1
+□ Visual field defect: +1
+ROSIER: ___ [&gt;0 = stroke likely; ≤0 = stroke unlikely — consider mimic]
+
+SYMPTOMS:
+Onset: exact time / gradual / woke with symptoms: ___
+Resolved: Y/N — time of resolution (TIA if &lt;24h, no infarct on imaging): ___
+□ Arm/hand weakness or numbness: R/L   □ Leg weakness: R/L
+□ Facial weakness / asymmetry: R/L   □ Slurred speech (dysarthria)
+□ Difficulty finding words / understanding (aphasia/dysphasia)
+□ Visual disturbance: sudden visual loss / homonymous hemianopia / diplopia / amaurosis fugax
+□ Vertigo / ataxia / falling (posterior circulation — HINTS exam)
+□ Headache (thunderclap — haemorrhagic stroke): Y/N
+
+STROKE MIMIC EXCLUSION:
+□ Hypoglycaemia (BM: ___ — Todd's paresis after seizure)
+□ Complex migraine (aura)   □ Hypertensive encephalopathy
+□ Tumour / abscess   □ Encephalitis   □ MS relapse
+
+VASCULAR RISK FACTORS:
+□ Hypertension   □ Atrial fibrillation (CHA₂DS₂-VASc score: ___)
+□ Diabetes   □ Hypercholesterolaemia   □ Smoking   □ Cardiac embolic source
+□ Previous TIA / stroke   □ Carotid stenosis   □ OCP
+□ Family history stroke / cardiovascular disease
+
+CONTRAINDICATIONS TO THROMBOLYSIS:
+□ Onset &gt;4.5h or LKW &gt;4.5h   □ CT evidence of haemorrhage
+□ Haemorrhagic stroke history ever   □ Recent surgery/trauma &lt;3 months
+□ Active bleeding   □ BP &gt;185/110 (relative)   □ INR &gt;1.7 / DOAC taken
+□ Platelet &lt;100,000   □ Glucose &lt;3 or &gt;22mmol/L
+
+ABCD² SCORE (TIA — 2-day stroke risk):
+A — Age ≥60: +1   B — BP ≥140/90: +1
+C — Clinical features: unilateral weakness=2 / speech disturbance=1 / other=0
+D — Duration: ≥60min=2 / 10-59min=1 / &lt;10min=0
+D — Diabetes: +1
+ABCD²: ___  [0-3=low; 4-5=moderate; 6-7=high — admit/urgent specialist review]
+
+EXAMINATION:
+BP: ___/___  HR: ___  (irregular = AF)  BM: ___  SpO2: ___%  Temp: ___
+NIHSS score: ___ (online calculator)
+Full cranial nerve exam
+Power: UL R___/5 L___/5   LL R___/5 L___/5
+Sensation: reduced: Y/N — distribution: ___
+Speech: normal / dysarthria / aphasia (expressive / receptive / global)
+Coordination: finger-nose / heel-shin: ___
+Gait: normal / hemiplegic / ataxic
+
+IMPRESSION:
+Stroke: Y/N   TIA: Y/N   ROSIER: ___   ABCD²: ___
+Thrombolysis candidate: Y/N   Thrombectomy candidate: Y/N
+Haemorrhagic: excluded by CT: Y/N
+</pre></div></div>
+</div>
+<div id="st-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>STROKE CALL: CT head immediately. Thrombolysis &lt;4.5h from onset. Do NOT give aspirin until haemorrhage excluded.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Acute Ischaemic Stroke</h4>
+<ul><li>CT head immediately (exclude haemorrhage before any treatment)</li>
+<li>Thrombolysis (&lt;4.5h, no contraindications): <span class="drug">Alteplase 0.9mg/kg IV (max 90mg) — 10% as bolus, 90% over 1h</span></li>
+<li>Mechanical thrombectomy (&lt;24h in selected large vessel occlusion): interventional neuroradiology referral</li>
+<li>Aspirin 300mg ONLY after haemorrhage excluded (and &gt;24h after thrombolysis)</li>
+<li>Admit to hyperacute stroke unit (HASU). Target BP &lt;185/110 for thrombolysis; otherwise avoid aggressive lowering acutely (unless hypertensive emergency).</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>TIA — Urgent Management (NICE NG128)</h4>
+<ul><li>ABCD² ≥4: admit or next-day TIA clinic (within 24h)</li>
+<li>Aspirin 300mg loading dose immediately (once haemorrhage excluded)</li>
+<li>Then: <span class="drug">Clopidogrel 75mg OD</span> (first-line NICE, long-term)</li>
+<li>Dual antiplatelet short-term: <span class="drug">Aspirin 75mg + Clopidogrel 75mg × 21 days</span> (high-risk TIA — reduces early stroke risk)</li>
+<li>Carotid Doppler if anterior circulation. ECHO if cardioembolic source suspected. 12-lead ECG + 24h Holter (AF detection).</li>
+<li>Statin: <span class="drug">Atorvastatin 40-80mg OD</span> immediately</li>
+<li>DVLA: must not drive for 1 month after TIA (advise and document)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Haemorrhagic Stroke</h4>
+<ul><li>Neurosurgery referral. Reverse anticoagulation urgently.</li>
+<li>Target BP &lt;140mmHg (SBP) within 1h (NICE — reduces haematoma expansion): <span class="drug">Labetalol IV</span> or <span class="drug">Nicardipine infusion</span></li>
+<li>Warfarin: <span class="drug">Vitamin K 10mg IV + Beriplex/PCC (Octaplex)</span> per INR table. DOACs: reversal agents.</li></ul></div></div>
+</div>
+</div>
+
+<!-- DKA -->
+<div id="p-dka" class="hidden">
+<div class="ph"><h2>DKA / HHS</h2><div class="tags"><span class="tag t-r">JBDS Guidelines</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'dk-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'dk-mgmt')">💊 JBDS Protocol</div>
+</div>
+<div id="dk-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-dk')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-dk">DKA / HHS ASSESSMENT
+=====================
+DKA DIAGNOSTIC CRITERIA (all 3 required):
+□ Glucose &gt;11mmol/L (or known diabetes)
+□ Ketones ≥3mmol/L (blood) or &gt;2+ urine ketones
+□ Bicarbonate &lt;15mmol/L and/or pH &lt;7.3
+Severity: mild (pH 7.25-7.3) / moderate (pH 7.1-7.25) / severe (pH &lt;7.1)
+
+HHS FEATURES (vs DKA):
+□ Glucose &gt;30mmol/L   □ Osmolality &gt;320mOsm/kg   □ No significant ketosis (&lt;3mmol/L)
+□ Bicarbonate &gt;15mmol/L   □ Usually older T2DM   □ Gradual onset (days-weeks)
+Calculated osmolality = 2(Na + K) + glucose + urea
+
+SYMPTOMS:
+Onset / duration: ___   Precipitant identified: ___
+□ Polyuria / polydipsia   □ Nausea / vomiting   □ Abdominal pain (DKA)
+□ Weakness / lethargy   □ Decreased consciousness (HHS/severe DKA)
+□ Kussmaul breathing (deep sighing) — DKA   □ Fruity/pear drop breath — DKA
+□ Dehydration: thirst / dry mouth / skin turgor
+
+PRECIPITANT SEARCH (SICK):
+S — Sepsis/Infection (pneumonia / UTI / cellulitis — commonest precipitant)
+I — Insulin omission / pump failure / new diagnosis T1DM
+C — Cardio event (MI / ACS)   Cushings / drugs (steroids / antipsychotics)
+K — Ketone-causing medications / DKA ketogenic diet
+
+PMHx: T1DM / T2DM — duration / previous DKA episodes
+Medications: insulin type/dose / SGLT2i (euglycaemic DKA risk) / steroids
+
+EXAMINATION:
+HR: ___  BP: ___/___  (lying/standing postural drop: Y/N)  RR: ___  Temp: ___
+GCS: ___/15   SpO₂: ___%
+Dehydration: dry mucous membranes / reduced skin turgor / sunken eyes
+Kussmaul breathing: Y/N   Ketotic breath: Y/N
+Abdominal tenderness: Y/N (can be DKA itself — abdo pain resolves with treatment)
+Signs of infection: chest / urine / skin / feet
+
+BLOODS:
+Glucose: ___   Blood ketones: ___   Venous pH: ___   HCO3: ___
+Na: ___  K: ___  Cl: ___  Urea: ___  Cr: ___   Calculated osmolality: ___
+Corrected Na (in hyperglycaemia): Na + 0.4 × [(glucose - 5.5)/5.5] = ___
+FBC: ___  CRP: ___  Lactate: ___   HbA1c: ___%
+
+IMPRESSION:
+DKA: Y/N   HHS: Y/N   Severity: mild / moderate / severe
+Precipitant: ___   Hypokalaemia on presentation: Y/N (K: ___)
+</pre></div></div>
+</div>
+<div id="dk-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>NEVER start insulin until K⁺ ≥3.5 mmol/L. Give IV KCl replacement first if K low. Monitor glucose and K hourly.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>DKA — IV Fluids (JBDS 2021)</h4>
+<ul><li>0.9% NaCl: <span class="drug">1L over 1h → 1L over 2h → 1L over 2h → 1L over 4h → 1L over 4h → 1L over 6h</span></li>
+<li>When glucose &lt;14mmol/L: add <span class="drug">10% glucose 125ml/h alongside saline</span> (dual bag — prevents hypoglycaemia)</li>
+<li>Adjust rate based on clinical assessment (urine output, haemodynamic status)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Potassium Replacement</h4>
+<ul><li>K &lt;3.5: <span class="drug">40mmol/h KCl</span> — hold insulin until K ≥3.5</li>
+<li>K 3.5-5.5: <span class="drug">40mmol/L in each litre of saline</span> (standard replacement)</li>
+<li>K &gt;5.5: no potassium added — monitor hourly</li>
+<li>Monitor K and glucose every hour</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Fixed-Rate Insulin Infusion (FRIII)</h4>
+<ul><li>Start only when K ≥3.5</li>
+<li><span class="drug">Human Actrapid 50 units in 50ml NaCl 0.9% — 0.1 units/kg/hour</span> (e.g. 70kg = 7 units/h)</li>
+<li>Continue until: ketones &lt;0.6 mmol/L AND pH &gt;7.3 AND patient eating</li>
+<li>Do NOT stop insulin until patient has eaten and received SC rapid-acting insulin (1h overlap)</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>HHS Management</h4>
+<ul><li>Slower rehydration: target osmolality reduction 3-8 mOsm/kg/h (risk of cerebral oedema if too rapid)</li>
+<li>0.9% NaCl: 1L over 1h, then slower (individualize)</li>
+<li>Insulin: NOT immediately. Only start if ketones &gt;1mmol/L or glucose not falling with fluids alone.</li>
+<li>VTE prophylaxis: LMWH (high thrombosis risk)</li>
+<li>Monitor Na, osmolality, glucose q2h. Aim glucose fall 5mmol/L/hour max.</li></ul></div></div>
+</div>
+</div>
+
+<!-- SEPSIS -->
+<div id="p-sepsis" class="hidden">
+<div class="ph"><h2>Sepsis</h2><div class="tags"><span class="tag t-r">NICE NG51</span><span class="tag t-b">Sepsis 6</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'se-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'se-mgmt')">💊 Sepsis 6 / Management</div>
+</div>
+<div id="se-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-se')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-se">SEPSIS ASSESSMENT
+==================
+SEPSIS SCREENING (NICE NG51 / UK Sepsis Trust):
+Suspected / confirmed infection PLUS any ONE of:
+□ NEWS2 ≥5 (single parameter or aggregate)
+□ Altered consciousness / confusion / agitation
+□ RR ≥25   □ HR ≥130   □ SBP &lt;90 or &gt;40mmHg drop from normal
+□ SpO₂ &lt;91% on O₂   □ Not passed urine in &gt;18h / urine output &lt;0.5ml/kg/h
+□ Non-blanching rash / mottled / ashen / cyanosed
+
+SEPTIC SHOCK CRITERIA:
+□ Sepsis + vasopressors needed to maintain MAP ≥65mmHg
+□ + Lactate &gt;2mmol/L despite adequate fluid resuscitation
+
+NEWS2 Score: ___   Lactate: ___mmol/L
+
+SOURCE IDENTIFICATION:
+Respiratory (pneumonia — cough / dyspnoea / creps): Y/N
+Urinary (UTI / pyelonephritis — dysuria / loin pain / urine dip): Y/N
+Abdominal (peritonitis / cholangitis / diverticulitis): Y/N
+Skin / soft tissue (cellulitis / necrotising fasciitis): Y/N
+CNS (meningitis / encephalitis): Y/N
+Line / device / prosthetic: Y/N
+Endocarditis (IVDU / prosthetic valve / embolic phenomena): Y/N
+Unknown source: Y/N
+
+HIGH-RISK FEATURES:
+□ Immunocompromised (HIV / chemotherapy / steroids / asplenic)
+□ Recent surgery / instrumentation   □ Indwelling catheter / line
+□ Pregnancy / postpartum   □ Extremes of age   □ Diabetic
+□ IVDU   □ Recent travel / animal contact
+
+SYMPTOMS:
+Fever / rigors: Y/N   Duration: ___   Temp: ___
+Localising symptoms: ___
+Rigors: Y/N   Confusion: Y/N   Skin rash: Y/N (character / distribution)
+
+EXAMINATION:
+NEWS2 parameters: HR ___  RR ___  SpO2 ___%  Temp ___  SBP ___  AVPU ___
+Supplemental O2: Y/N   Capillary refill: ___s   Skin: warm/mottled/cold/cyanosed
+Non-blanching petechial/purpuric rash: Y/N (meningococcaemia — penicillin NOW)
+Source examination: chest / abdomen / urine / skin / lines / joints / meninges
+
+IMPRESSION:
+Sepsis: Y/N   Septic shock: Y/N
+Suspected source: ___   Likely organism: ___
+Immunocompromised: Y/N   Neutropenic: Y/N
+</pre></div></div>
+</div>
+<div id="se-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>SEPSIS 6 within 1 hour: Give 3, Take 3. Antibiotics within 1h of recognition — every hour delay increases mortality 7%.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>GIVE: O₂ / Fluids / Antibiotics</h4>
+<ul><li>O₂: high-flow to maintain SpO₂ &gt;94%</li>
+<li>IV fluids: <span class="drug">500ml crystalloid (Hartmann's / NaCl 0.9%) bolus IV over 15 min</span> — repeat if haemodynamically compromised (up to 30ml/kg within 3h)</li>
+<li>Antibiotics — GIVE WITHIN 1 HOUR — empirical (adjust to local policy):<br>
+  Community-acquired: <span class="drug">Piperacillin/tazobactam 4.5g IV TDS</span> (broad gram-positive and negative cover)<br>
+  Meningitis: <span class="drug">Ceftriaxone 2g IV + Dexamethasone 10mg IV</span><br>
+  Penicillin allergy: <span class="drug">Meropenem 1g IV TDS</span> (discuss with microbiology)<br>
+  Neutropenic: <span class="drug">Piperacillin/tazobactam 4.5g IV TDS ± Gentamicin</span></li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>TAKE: Bloods / Cultures / Urine</h4>
+<ul><li>Blood cultures × 2 sets (before antibiotics if possible — but do NOT delay antibiotics)</li>
+<li>Lactate (arterial or venous): &gt;4mmol/L = severe sepsis / shock → urgent ITU</li>
+<li>FBC / U&E / LFTs / CRP / glucose / clotting / G&S</li>
+<li>Urine: output (catheterise), dip, MC&S</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Septic Shock — Vasopressors</h4>
+<ul><li>If MAP &lt;65mmHg despite adequate fluid resuscitation:</li>
+<li><span class="drug">Noradrenaline 0.05-0.5 mcg/kg/min IV via central line</span> (first-line vasopressor)</li>
+<li>Add <span class="drug">vasopressin 0.03 units/min</span> if refractory (specialist)</li>
+<li>Target: MAP ≥65mmHg, lactate clearance, urine output ≥0.5ml/kg/h</li>
+<li>ITU admission. Repeat lactate 2h after fluids.</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Meningococcal Septicaemia</h4>
+<ul><li>Non-blanching purpuric rash = <span class="drug">Benzylpenicillin 2.4g IV immediately</span> (or IM if no IV access)</li>
+<li>Do NOT wait for LP. Call ITU.</li></ul></div></div>
+</div>
+</div>
+
+<!-- GI BLEED -->
+<div id="p-gibleed" class="hidden">
+<div class="ph"><h2>GI Bleed</h2><div class="tags"><span class="tag t-r">Glasgow-Blatchford Score</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'gi-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'gi-diff')">🔍 Differentials</div>
+  <div class="tb" onclick="tab(this,'gi-mgmt')">💊 Management</div>
+</div>
+<div id="gi-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-gi')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-gi">GI BLEED ASSESSMENT
+====================
+HAEMODYNAMIC STATUS FIRST:
+HR: ___  BP: ___/___  Postural drop: Y/N  SpO₂: ___%
+Shocked: Y/N (HR &gt;100 + SBP &lt;100 = haemodynamic compromise — immediate resuscitation)
+
+CHARACTERISATION:
+Upper GI (haematemesis / melaena — Treitz ligament and above):
+□ Haematemesis: Y/N — frank blood / coffee grounds — volume: ___
+□ Melaena (black tarry offensive stool): Y/N — frequency: ___
+
+Lower GI (haematochezia — below Treitz ligament):
+□ PR bleeding: Y/N — fresh red / dark red / mixed with stool / on paper only
+□ Volume: ___   Frequency: ___
+
+AMOUNT / SEVERITY:
+□ Spotting / streaks   □ Mixed with stool   □ Clots   □ Filling toilet
+□ Haemodynamically compromised: Y/N
+
+GLASGOW-BLATCHFORD SCORE (UGIB):
+Urea ≥6.5: +2-6   Hb (M &lt;130 or F &lt;120): +1-6   SBP &lt;110: +1-3
+HR ≥100: +1   Melaena: +1   Syncope: +2   Hepatic disease: +2   Cardiac failure: +2
+GBS: ___  [0 = low risk, outpatient; &gt;0 = admit for endoscopy]
+
+ASSOCIATED SYMPTOMS:
+□ Abdominal pain: Y/N — site / character
+□ Nausea / vomiting preceding haematemesis
+□ Weight loss / anorexia (malignancy)
+□ Change in bowel habit (LGIB — malignancy / IBD)
+□ Tenesmus / mucus (IBD / rectal malignancy)
+□ Dysphagia (oesophageal — Mallory-Weiss / varices / cancer)
+□ Alcohol excess / liver disease (varices)
+□ Jaundice / ascites / spider naevi (cirrhosis / portal hypertension)
+
+RISK FACTORS FOR UGIB:
+□ NSAIDs / aspirin / steroids (peptic ulcer)
+□ Alcohol / liver disease (varices / Mallory-Weiss / gastritis)
+□ Anticoagulants (warfarin / DOACs) / antiplatelets
+□ Previous UGIB / peptic ulcer / H. pylori
+□ Aortic aneurysm repair (aorto-enteric fistula — late complication)
+
+PMHx: peptic ulcer / cirrhosis / IBD / malignancy / coagulopathy
+Meds: NSAIDs / aspirin / clopidogrel / warfarin / DOACs / steroids / SSRIs
+
+EXAMINATION:
+Pallor: Y/N   Jaundice: Y/N   Stigmata of chronic liver disease: Y/N
+(spider naevi / palmar erythema / caput medusae / asterixis / gynaecomastia)
+Abdomen: tenderness / hepatomegaly / splenomegaly / ascites / pulsatile mass
+PR examination: Y/N — melaena / fresh blood / mass / haemorrhoids
+
+IMPRESSION:
+UGIB vs LGIB   GBS: ___   Risk: low / high
+Variceal vs non-variceal (cirrhosis features): Y/N   Haemodynamic compromise: Y/N
+</pre></div></div>
+</div>
+<div id="gi-diff" class="tc">
+<table><tr><th>UGIB Cause</th><th>Features</th></tr>
+<tr><td>Peptic ulcer (commonest)</td><td>NSAIDs/H. pylori, epigastric pain, melaena</td></tr>
+<tr><td>Oesophageal varices</td><td>Cirrhosis, large volume haematemesis, portal HTN</td></tr>
+<tr><td>Mallory-Weiss tear</td><td>Repeated vomiting then haematemesis, alcohol</td></tr>
+<tr><td>Oesophagitis/GORD</td><td>Burning pain, coffee grounds, mild</td></tr>
+<tr><td>Gastric cancer</td><td>Elderly, weight loss, iron deficiency</td></tr>
+<tr><th>LGIB Cause</th><th>Features</th></tr>
+<tr><td>Diverticular disease</td><td>Painless, large volume, older patient</td></tr>
+<tr><td>Angiodysplasia</td><td>Elderly, recurrent, small amounts</td></tr>
+<tr><td>Colorectal cancer</td><td>Change in bowel habit, weight loss, iron deficiency</td></tr>
+<tr><td>IBD (UC/Crohn's)</td><td>Younger, mucus, diarrhoea, systemic symptoms</td></tr>
+<tr><td>Haemorrhoids</td><td>Fresh blood on paper, perianal pain, no systemic symptoms</td></tr>
+</table>
+</div>
+<div id="gi-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Variceal bleed: HIGHEST mortality. Terlipressin + antibiotics + urgent OGD. Do NOT give PPI alone for varices.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Resuscitation (all GI Bleeds)</h4>
+<ul><li>2× large-bore IV cannulae. Blood for FBC, U&E, LFTs, clotting, G&S (cross-match if major).</li>
+<li>IV fluids: <span class="drug">Hartmann's 500ml bolus</span> — transfuse if Hb &lt;70g/L (target 70-90g/L, &lt;80g/L in variceal bleed)</li>
+<li>Reverse anticoagulation if major bleed</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Non-Variceal UGIB</h4>
+<ul><li>GBS &gt;0: admit for OGD within 24h (urgent OGD if haemodynamic compromise)</li>
+<li><span class="drug">PPI: Omeprazole 80mg IV bolus then 8mg/h infusion</span> (or oral PPI if stable)</li>
+<li>OGD: endoscopic haemostasis (clips / adrenaline injection / thermal)</li>
+<li>H. pylori testing (CLO test at OGD) — treat if positive</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Variceal Bleed</h4>
+<ul><li><span class="drug">Terlipressin 2mg IV QDS</span> (or <span class="drug">Octreotide 50mcg IV bolus then 50mcg/h</span>)</li>
+<li><span class="drug">Ceftriaxone 1g IV OD</span> (prophylactic antibiotics — reduces rebleeding and mortality)</li>
+<li>Urgent OGD for banding / sclerotherapy within 12h</li>
+<li>Balloon tamponade (Sengstaken-Blakemore tube) as bridge if OGD unavailable and uncontrolled bleed</li>
+<li>TIPSS (transjugular intrahepatic portosystemic shunt) if refractory</li></ul></div></div>
+</div>
+</div>
+
+<!-- TOXICOLOGY -->
+<div id="p-toxicology" class="hidden">
+<div class="ph"><h2>Toxicology / Overdose</h2><div class="tags"><span class="tag t-r">EMERGENCY</span><span class="tag t-b">TOXBASE / NPIS: 0344 892 0111</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'tx-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'tx-tox')">☠️ Toxidromes</div>
+  <div class="tb" onclick="tab(this,'tx-mgmt')">💊 Specific Antidotes</div>
+</div>
+<div id="tx-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-tx')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-tx">TOXICOLOGY ASSESSMENT
+=====================
+⚠️ TOXBASE (www.toxbase.org) or NPIS: 0344 892 0111 for specific management
+Resuscitation first — ABCDE regardless of cause
+
+SUBSTANCE IDENTIFICATION:
+Substance(s): ___________________________
+Quantity / strength / formulation: ___
+Time of ingestion: ___   Time since: ___h
+Route: oral / IV / inhaled / dermal / rectal
+Intentional / accidental / recreational: ___
+Vomiting since ingestion: Y/N   Any activated charcoal given pre-hospital: Y/N
+
+CO-INGESTION / POLY-PHARMACY:
+□ Alcohol: Y/N — amount: ___
+□ Other recreational drugs: ___
+□ Multiple agents: ___
+
+PARACETAMOL ASSESSMENT (always check in self-harm):
+□ Paracetamol ingested: Y/N — dose: ___g   time of ingestion: ___
+□ Paracetamol level: ___ mcmol/L at ___ hours post-ingestion
+□ Plot on Rumack-Matthew nomogram — treatment line exceeded: Y/N
+□ High-risk (malnutrition / alcohol / enzyme inducers): Y/N
+
+ASPIRIN / SALICYLATE:
+□ Dose: ___mg   Serum salicylate: ___mg/L (toxic &gt;350mg/L)
+□ Tinnitus / hyperventilation / vomiting: Y/N
+
+INTENTION:
+□ Deliberate self-harm (DSH)   □ Accidental   □ Recreational
+□ Mental health: see psychiatric proforma. Assess suicide risk.
+
+PMHx: previous overdose / psychiatric history / chronic medications
+Medications (normal medications — may be part of OD): ___
+Allergies: ___
+
+EXAMINATION — TOXIDROME PATTERN:
+HR: ___  BP: ___/___  Temp: ___  RR: ___  SpO₂: ___% on ___
+GCS: ___/15 (E_V_M_)   Pupils: size L___mm R___mm — dilated / constricted / PEARL
+Skin: dry/flushed/hot (anticholinergic) / wet/diaphoretic (cholinergic/sympathomimetic) / cool/pale (opioid)
+Bowel sounds: increased / decreased   Urinary retention: Y/N
+Muscle tone: normal / increased (serotonin / NMS) / rigidity / clonus
+
+ECG: QRS width: ___ms (widened &gt;120ms = TCA / Na channel block)
+QTc: ___ms (prolonged &gt;500ms = arrhythmia risk)
+
+INVESTIGATIONS:
+Paracetamol level (4h post-ingestion for nomogram — if unknown time: take now)
+Salicylate level   Ethanol level   Blood glucose
+FBC / U&E / LFTs / clotting / ABG (metabolic acidosis)   Lactate
+Urine toxicology screen (qualitative): ___   12-lead ECG   CXR (aspiration)
+
+IMPRESSION:
+Substance: ___   Amount: ___   Time post-ingestion: ___
+Toxidrome: opioid / anticholinergic / cholinergic / sympathomimetic / serotonin / sedative
+NAC indicated for paracetamol: Y/N   Specific antidote required: ___
+</pre></div></div>
+</div>
+<div id="tx-tox" class="tc">
+<table><tr><th>Toxidrome</th><th>HR</th><th>BP</th><th>Temp</th><th>Pupils</th><th>Skin</th><th>GI</th><th>CNS</th><th>Examples</th></tr>
+<tr><td><strong>Opioid</strong></td><td>↓</td><td>↓</td><td>↓</td><td>Pinpoint</td><td>Cool, pale</td><td>↓ BS</td><td>↓ GCS, respiratory depression</td><td>Morphine, heroin, codeine, fentanyl</td></tr>
+<tr><td><strong>Anticholinergic</strong></td><td>↑</td><td>↑</td><td>↑</td><td>Dilated</td><td>Dry, flushed, hot</td><td>↓ BS, retention</td><td>Confusion, agitation, hallucinations</td><td>TCAs, antihistamines, atropine</td></tr>
+<tr><td><strong>Cholinergic</strong></td><td>↓</td><td>↓</td><td>Normal</td><td>Constricted</td><td>Wet, diaphoretic</td><td>↑ BS, D+V, cramps</td><td>Confusion, seizures</td><td>Organophosphates, nerve agents, physostigmine</td></tr>
+<tr><td><strong>Sympathomimetic</strong></td><td>↑↑</td><td>↑↑</td><td>↑</td><td>Dilated</td><td>Diaphoretic</td><td>Normal/↓</td><td>Agitation, psychosis, seizures</td><td>Cocaine, amphetamine, MDMA</td></tr>
+<tr><td><strong>Serotonin Syndrome</strong></td><td>↑↑</td><td>↑↑</td><td>↑↑</td><td>Dilated</td><td>Diaphoretic</td><td>D+V</td><td>Clonus, hyperreflexia, tremor, rigidity</td><td>SSRIs+MAOIs, tramadol, linezolid, lithium</td></tr>
+<tr><td><strong>Sedative/Hypnotic</strong></td><td>↓</td><td>↓</td><td>↓</td><td>Normal</td><td>Normal</td><td>Normal</td><td>↓ GCS, ataxia, slurred speech</td><td>Benzodiazepines, barbiturates, alcohol</td></tr>
+</table>
+<div class="alert a-b">💡 <strong>Serotonin Syndrome vs NMS:</strong> Serotonin = rapid onset (hours), clonus/hyperreflexia, hyperthermia. NMS = slow onset (days), lead-pipe rigidity, high CK — after antipsychotics.</div>
+</div>
+<div id="tx-mgmt" class="tc">
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Paracetamol — NAC (2-bag MHRA regimen)</h4>
+<ul><li>Plot level on Rumack-Matthew nomogram at ≥4h from ingestion</li>
+<li>Bag 1: <span class="drug">Acetylcysteine 100mg/kg in 200ml 5% glucose over 2h</span></li>
+<li>Bag 2: <span class="drug">Acetylcysteine 200mg/kg in 1000ml 5% glucose over 16h</span></li>
+<li>If &lt;1h post-ingestion and &gt;75mg/kg: <span class="drug">Activated charcoal 50g PO</span> (reduces absorption)</li>
+<li>High risk: start NAC immediately without waiting for levels</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Opioid — Naloxone</h4>
+<ul><li><span class="drug">Naloxone 400mcg IV/IM/intranasal</span> — titrate to respiratory rate, NOT GCS (avoid acute withdrawal)</li>
+<li>Repeat every 2-3 min up to 2mg if needed</li>
+<li>Half-life shorter than most opioids — infusion may be needed: <span class="drug">2/3 of effective bolus per hour</span></li>
+<li>Observation for ≥6h (12h for modified-release opioids)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>TCA / Na Channel Blocker — Sodium Bicarbonate</h4>
+<ul><li>QRS &gt;120ms or arrhythmia: <span class="drug">8.4% NaHCO3 50-100ml IV bolus</span></li>
+<li>Target: serum pH 7.45-7.55 (alkalinisation reduces drug binding to Na channels)</li>
+<li>Repeat as needed. Avoid hypokalaemia.</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Organophosphate — Atropine + Pralidoxime</h4>
+<ul><li><span class="drug">Atropine 2mg IV</span> — double dose every 5-10 min until secretions dry (may need hundreds of mg)</li>
+<li><span class="drug">Pralidoxime 30mg/kg IV over 30 min</span> then infusion (reactivates cholinesterase — give within 24h)</li></ul></div></div>
+<div class="mstep"><div class="sn">5</div><div class="sc"><h4>Carbon Monoxide — O₂</h4>
+<ul><li><span class="drug">100% O₂ via tight-fitting NRB mask</span> for minimum 6h (reduces CO half-life from 4-5h to 60-90 min)</li>
+<li>Consider hyperbaric O₂ if: COHb &gt;25% / unconscious / cardiac involvement / pregnant / neurological symptoms</li>
+<li>ECG (CO causes arrhythmias). COHb level: ___</li></ul></div></div>
+</div>
+</div>
+
+<!-- PSYCHIATRIC EMERGENCIES -->
+<div id="p-psych" class="hidden">
+<div class="ph"><h2>Psychiatric Emergencies</h2><div class="tags"><span class="tag t-o">NICE NG10 / MHA 1983</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'ps-hist')">📋 MSE / Risk Assessment</div>
+  <div class="tb" onclick="tab(this,'ps-rt')">💊 Rapid Tranquillisation</div>
+  <div class="tb" onclick="tab(this,'ps-dsh')">⚠️ DSH / Self-Harm</div>
+</div>
+<div id="ps-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 MSE / Risk Assessment Template</h3><button class="cpbtn" onclick="copyPF('pf-ps')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-ps">PSYCHIATRIC EMERGENCY ASSESSMENT
+==================================
+PRESENTING COMPLAINT: Agitation / aggression / psychosis / self-harm / suicidality / overdose
+
+SAFETY FIRST: own safety / de-escalation / 1:1 nursing / remove potential weapons from environment
+
+MENTAL STATE EXAMINATION (MSE):
+Appearance and behaviour: well/poorly kempt / eye contact / rapport / agitation / restlessness
+Speech: rate (pressured/slow) / tone / volume / coherence
+Mood (subjective): "how do you feel?" ___
+Affect (objective): euthymic / depressed / elevated / anxious / labile / blunted / incongruous
+Thought form: logical / circumstantial / tangential / flight of ideas / thought block / loosening of associations
+Thought content:
+  □ Suicidal ideation: passive (wish to be dead) / active (plan: ___) / intent: ___
+  □ Homicidal ideation: Y/N — specific plan/target: ___
+  □ Delusions: persecutory / grandiose / referential / nihilistic / jealous / other: ___
+  □ Obsessions / compulsions: Y/N
+Perceptions:
+  □ Hallucinations: auditory (command: Y/N) / visual / tactile / olfactory
+  □ Pseudohallucinations (insight preserved): Y/N
+Cognition: MMSE/4AT if relevant — orientation: Y/N
+Insight: full / partial / none
+
+RISK ASSESSMENT:
+SUICIDE RISK FACTORS:
+□ Previous attempt (method / lethality / rescue): Y/N
+□ Current suicidal ideation with plan: Y/N
+□ Access to means (medications / weapons): Y/N
+□ Male gender / older age / social isolation
+□ Psychiatric diagnosis (depression / psychosis / substance misuse)
+□ Recent significant loss / stressor
+□ Hopelessness / no protective factors
+□ History of impulsivity / violence
+
+VIOLENCE RISK:
+□ History of violence / forensic history: Y/N
+□ Current threats: Y/N   □ Weapons access: Y/N
+
+PROTECTIVE FACTORS:
+□ Family support   □ Engaged with services   □ Future plans   □ Reasons for living
+
+CAPACITY (MCA 2005):
+□ Understands: Y/N   □ Retains: Y/N   □ Weighs up: Y/N   □ Communicates: Y/N
+Capacity: intact / impaired — specific to: ___
+
+MHA 1983 — DETAINING POWERS:
+S136: Police remove from public place to place of safety — max 24h
+S5(4): Nurse holding power — inpatient only — max 6h
+S5(2): Doctor holding power — inpatient — max 72h (requires 1 doctor)
+S4: Emergency admission — 1 doctor + AMHP — max 72h (S2 conversion)
+S2: Admission for assessment — 2 doctors + AMHP — up to 28 days
+S3: Admission for treatment — 2 doctors (one approved Section 12) + AMHP — up to 6 months
+
+IMPRESSION:
+Working diagnosis: ___   Risk: low / medium / high
+Capacity: Y/N   Detention under MHA: Y/N   Section: ___
+</pre></div></div>
+</div>
+<div id="ps-rt" class="tc">
+<div class="alert a-r">⚠️ <strong>Verbal de-escalation first. Offer oral medication before IM. Avoid olanzapine IM within 1h of IM lorazepam (respiratory depression risk).</strong></div>
+<table><tr><th>Drug</th><th>Dose</th><th>Route</th><th>Notes</th></tr>
+<tr><td>Lorazepam (NICE first-line)</td><td>1-2mg</td><td>PO/IM</td><td>Repeat after 45-60 min if needed. Max 4mg/24h. Monitor resp rate.</td></tr>
+<tr><td>Haloperidol</td><td>5mg</td><td>PO/IM</td><td>Add if lorazepam inadequate. Can repeat after 45 min. ECG (QTc). EPS risk.</td></tr>
+<tr><td>Olanzapine</td><td>5-10mg</td><td>PO or IM</td><td>Do NOT give IM within 1h of IM benzodiazepine. Good for psychosis.</td></tr>
+<tr><td>Promethazine</td><td>25-50mg</td><td>PO/IM</td><td>Sedating antihistamine. Alternative if benzodiazepines contraindicated (e.g. alcohol).</td></tr>
+<tr><td>Droperidol</td><td>5-10mg</td><td>IM/IV</td><td>Rapid onset. ECG monitoring. RCEM pathway for acute behavioural disturbance.</td></tr>
+</table>
+<div class="alert a-y">⚠️ Monitor: RR, HR, BP, SpO₂ every 5-15 min after RT. Resuscitation equipment available. Flumazenil (benzo reversal) and naloxone at hand.</div>
+</div>
+<div id="ps-dsh" class="tc">
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>DSH — Immediate Medical</h4>
+<ul><li>ABCDE assessment. Treat any medical emergency first (see Toxicology for OD).</li>
+<li>Paracetamol level in ALL overdoses (regardless of stated substance)</li>
+<li>Wound care for lacerations: irrigation, closure, tetanus status</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Psychiatric Assessment</h4>
+<ul><li>Full MSE and risk assessment (see proforma above)</li>
+<li>Liaison psychiatry referral: all deliberate self-harm (NICE NG225)</li>
+<li>Do not discharge without psychiatric assessment if: high lethality attempt / active suicidal ideation with plan / no support / unknown intent</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Capacity and Consent</h4>
+<ul><li>Mental Capacity Act 2005: if lacks capacity → best interests decision (treat)</li>
+<li>If has capacity and refuses treatment: document clearly. Involve senior / psychiatry. If actively suicidal and psychotic → consider MHA.</li>
+<li>If risk of absconding: risk assessment, involve security/nursing, consider MHA s5(4) / s5(2)</li></ul></div></div>
+</div>
+</div>
+
+<!-- PAEDIATRIC FEVER -->
+<div id="p-paedfever" class="hidden">
+<div class="ph"><h2>Paediatric Fever</h2><div class="tags"><span class="tag t-r">NICE NG143</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'pf-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'pf-tl')">🚦 Traffic Light System</div>
+  <div class="tb" onclick="tab(this,'pf-mgmt')">💊 Management</div>
+</div>
+<div id="pf-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-pf')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-pf">PAEDIATRIC FEVER ASSESSMENT
+============================
+Age: ___   Weight: ___kg   Immunisations: up-to-date Y/N
+
+FEVER:
+Temperature: ___°C   Method: rectal / axillary / tympanic / oral
+Duration: ___days   Pattern: continuous / intermittent / rigors: Y/N
+Responding to antipyretics: Y/N
+
+AGE-SPECIFIC VITAL SIGNS (ALERT: PEWS/POPS score):
+0-3 months:  HR 100-160 / RR 30-60 / SBP &gt;70 — any fever = immediate review
+3-6 months:  HR 90-160 / RR 30-45
+6-12 months: HR 80-160 / RR 25-40
+1-3 years:   HR 80-150 / RR 20-35
+3-5 years:   HR 70-130 / RR 20-30
+5-12 years:  HR 60-120 / RR 15-25
+
+Current: HR ___  RR ___  BP ___/___  SpO₂ ___%  Cap refill ___s
+
+ASSOCIATED SYMPTOMS:
+□ Rash: Y/N — character (macular / papular / urticarial / purpuric / petechial — NON-BLANCHING = EMERGENCY)
+□ Bulging fontanelle (if &lt;18 months): Y/N
+□ Neck stiffness / photophobia / Kernig's (meningism): Y/N
+□ Abnormal cry: high-pitched / continuous: Y/N
+□ Decreased consciousness / not rousable: Y/N
+□ Seizure (febrile convulsion): Y/N — duration / focal: Y/N
+
+FOCUS OF INFECTION:
+□ URTI / coryza / otitis media   □ Sore throat / tonsillitis
+□ Cough / breathlessness (LRTI / pneumonia / bronchiolitis)
+□ Vomiting / diarrhoea (gastroenteritis)
+□ Dysuria / wetting (UTI — urine dip / MC&S)
+□ Cellulitis / skin infection   □ Limb pain / limp (septic arthritis / osteomyelitis)
+□ No focus identified (bacteraemia / viral illness / occult infection)
+
+HIGH-RISK GROUPS:
+□ Age &lt;3 months (any fever = assess urgently)
+□ Immunocompromised / on steroids / splenectomy
+□ Previously well &lt;12h before deterioration
+□ Not vaccinated
+
+PMHx: premature / chronic condition / immunodeficiency / recurrent infections
+Meds: recent antibiotics (affects cultures)   Recent travel: Y/N
+
+EXAMINATION (NICE TRAFFIC LIGHT):
+Colour: normal / pale / mottled / ashen / blue (RED)
+Activity: alert / normal cry / responds normally / decreased activity / inconsolable (RED)
+Respiratory: normal / mild recession / tachypnoea / grunting / severe recession (RED)
+Hydration: normal / reduced skin turgor / sunken eyes / dry mucous membranes (RED)
+Other: non-blanching rash / bulging fontanelle / neck stiffness (RED — immediate)
+
+IMPRESSION:
+Risk: GREEN (low) / AMBER (intermediate) / RED (high) — NICE traffic light: ___
+Suspected focus: ___   Sepsis: Y/N
+</pre></div></div>
+</div>
+<div id="pf-tl" class="tc">
+<div class="alert a-r">🚨 <strong>ANY non-blanching petechial / purpuric rash = Meningococcal until proven otherwise. Benzylpenicillin immediately.</strong></div>
+<table><tr><th>Feature</th><th>GREEN — Low Risk</th><th>AMBER — Intermediate</th><th>RED — High Risk</th></tr>
+<tr><td>Colour</td><td>Normal</td><td>Pallor (parent reported)</td><td>Pale/mottled/ashen/blue</td></tr>
+<tr><td>Activity</td><td>Responds normally, content, stays awake</td><td>Not responding normally, wakes with prolonged stimulation</td><td>No response, unable to rouse, weak/high-pitched cry</td></tr>
+<tr><td>Respiratory</td><td>Normal</td><td>Tachypnoea (RR &gt;50 &lt;12m, &gt;40 &gt;12m), SpO₂ &lt;95%, creps</td><td>Grunting, severe recession, RR &gt;60</td></tr>
+<tr><td>Hydration</td><td>Normal</td><td>Dry mucous membranes, reduced urine output, poor feeding</td><td>Reduced turgor</td></tr>
+<tr><td>Other</td><td>None of amber/red</td><td>Fever &gt;5 days, swelling of limb, non-weight bearing, &lt;3m with 38°+</td><td>Non-blanching rash, bulging fontanelle, neck stiffness, focal neuro, seizure, &lt;3m with 38°+</td></tr>
+<tr><td>Action</td><td>Safety net, home care advice</td><td>Investigate (urine, CXR, FBC/CRP if indicated)</td><td>Immediate assessment, treat empirically, admit</td></tr>
+</table>
+</div>
+<div id="pf-mgmt" class="tc">
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Meningococcal Septicaemia / Bacterial Meningitis</h4>
+<ul><li>Non-blanching rash: <span class="drug">Benzylpenicillin IV/IM immediately</span>: &lt;1yr: 300mg / 1-9yrs: 600mg / ≥10yrs: 1200mg</li>
+<li>If penicillin allergic: <span class="drug">Ceftriaxone 80mg/kg IV (max 4g)</span></li>
+<li>Meningitis: <span class="drug">Ceftriaxone 80mg/kg OD IV</span> + <span class="drug">Dexamethasone 0.15mg/kg QDS × 4 days</span> (age &gt;3m)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Antipyretics</h4>
+<ul><li><span class="drug">Paracetamol 15mg/kg PO/PR q4-6h</span> (max 60mg/kg/day)</li>
+<li><span class="drug">Ibuprofen 5-10mg/kg PO q6-8h</span> (if &gt;3 months, not dehydrated)</li>
+<li>Alternate if distressed (paracetamol + ibuprofen — offset by 2-3h)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Febrile Seizure</h4>
+<ul><li>First-line: <span class="drug">Buccal midazolam 0.3mg/kg (max 10mg)</span> or <span class="drug">Diazepam 0.5mg/kg PR</span></li>
+<li>If &gt;5 min: treat as status epilepticus</li>
+<li>Simple febrile convulsion (&lt;15 min, generalised, recovers fully): reassure, safety net, no LP needed</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>UTI in Children (NICE NG224)</h4>
+<ul><li>&lt;3 months: IV antibiotics, admit urgently</li>
+<li>3m-3yrs, systemically unwell: oral cefalexin 12.5mg/kg TDS or co-amoxiclav</li>
+<li>&gt;3 years: trimethoprim 4mg/kg BD (check local resistance) × 3-7 days</li>
+<li>Imaging: USS kidneys within 6 weeks for first febrile UTI &lt;6 months or recurrent UTI</li></ul></div></div>
+</div>
+</div>
+
+<!-- AKI -->
+<div id="p-aki" class="hidden">
+<div class="ph"><h2>Acute Kidney Injury (AKI)</h2><div class="tags"><span class="tag t-o">TIME-SENSITIVE</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'ak-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'ak-mgmt')">💊 NICE Management</div>
+</div>
+<div id="ak-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-ak')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-ak">ACUTE KIDNEY INJURY ASSESSMENT
+================================
+AKI STAGING (KDIGO):
+Stage 1: Cr rise ≥26μmol/L in 48h OR ≥1.5×baseline
+Stage 2: Cr ≥2×baseline
+Stage 3: Cr ≥3×baseline OR Cr ≥354μmol/L OR commenced on RRT
+AKI Stage: ___   Baseline Cr: ___   Current Cr: ___   eGFR: ___
+
+HYPERKALAEMIA ASSESSMENT (treat first if K &gt;6.0):
+K⁺: ___mmol/L   ECG changes: Y/N
+
+SYMPTOMS:
+□ Oliguria (&lt;0.5ml/kg/h or &lt;400ml/day) / anuria   Duration: ___
+□ Frothy/dark urine   □ Haematuria   □ Oedema
+□ Nausea/vomiting   □ Confusion   □ Breathlessness (fluid overload)
+
+CAUSE ASSESSMENT (PRE/INTRA/POST-RENAL):
+PRE-RENAL (hypovolaemia/hypoperfusion):
+□ Fluid loss: vomiting / diarrhoea / haemorrhage / burns / excessive diuresis
+□ Reduced intake   □ Sepsis / shock   □ Cardiac failure   □ NSAIDs + ACEi/ARB
+□ Recent contrast exposure (CI-AKI)
+
+INTRA-RENAL (parenchymal):
+□ ATN — ischaemic (post-prerenal if prolonged) or nephrotoxic (aminoglycosides, vancomycin, contrast, cisplatin)
+□ Glomerulonephritis (haematuria + proteinuria + oedema = nephritic syndrome)
+□ Interstitial nephritis (drug reaction: NSAIDs, antibiotics, PPIs — triad: rash + fever + eosinophilia)
+□ Rhabdomyolysis (dark urine, CK elevated)
+□ Myeloma (protein gap, bone pain, elderly)
+
+POST-RENAL (obstruction):
+□ Urinary retention (palpable bladder / MSU)
+□ Prostatic enlargement   □ Ureteric stone / calculus   □ Pelvic malignancy
+
+NEPHROTOXIC DRUG SCREEN (STOP or HOLD):
+□ NSAIDs   □ ACEi / ARBs   □ Metformin   □ Methotrexate
+□ Aminoglycosides   □ Vancomycin   □ Contrast   □ Diuretics (if pre-renal)
+□ DOACs / LMWH (dose-reduce/hold in AKI)   □ Lithium
+
+PMHx: CKD (baseline Cr: ___)   DM   HTN   myeloma   prostate disease
+Medications: ACEi / ARBs / NSAIDs / diuretics / antibiotics
+
+EXAMINATION:
+BP: ___/___   HR: ___   JVP: normal / elevated / not seen
+Volume status: hypovolaemic / euvolaemic / fluid overloaded
+Skin turgor: normal / reduced   Mucous membranes: moist / dry
+Pitting oedema: Y/N   Bladder: palpable Y/N   Loin tenderness: Y/N
+
+INVESTIGATIONS:
+U&E: Na___  K___  Cl___  Bicarb___  Urea___  Cr___  Ca___  Phosphate___
+eGFR: ___   Baseline Cr: ___
+FBC   LFTs   CRP   Glucose   Albumin
+Urine: dip (protein ___  blood ___)   MC&S
+  Urine Na &lt;20mmol/L = pre-renal (kidney conserving Na)
+  Urine Na &gt;40mmol/L = intrarenal (tubular damage)
+CK: ___ (rhabdomyolysis)
+USS kidneys (obstruction, size, asymmetry)
+ECG: hyperkalaemia features (tall T waves / widened QRS / sine wave)
+
+IMPRESSION:
+AKI Stage: ___   Cause: pre-renal / intrarenal / post-renal
+Precipitant: ___   Hyperkalaemia: Y/N (K: ___)
+</pre></div></div>
+</div>
+<div id="ak-mgmt" class="tc">
+<div class="alert a-r">⚠️ <strong>Treat hyperkalaemia immediately if K &gt;6.0 or ECG changes — regardless of K level if ECG changes present</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Hyperkalaemia Emergency (K &gt;6.0 or ECG changes)</h4>
+<ul><li><span class="drug">Calcium gluconate 10% 30ml IV over 5-10 min</span> — cardiac membrane stabilisation. Repeat if ECG not improving. Does NOT lower K.</li>
+<li><span class="drug">Salbutamol 10-20mg nebulised</span> — shifts K into cells (onset 30 min)</li>
+<li><span class="drug">Actrapid 10 units + 50ml 50% glucose (or 250ml 20% glucose) IV over 15 min</span> — shifts K. Monitor glucose q30min.</li>
+<li><span class="drug">Sodium bicarbonate 8.4% 50ml IV</span> — if metabolic acidosis (pH &lt;7.1)</li>
+<li><span class="drug">Calcium resonium 15g PO</span> or Patiromer — eliminates K (onset hours)</li>
+<li>If refractory: emergency haemodialysis — nephrology urgently</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Pre-Renal AKI</h4>
+<ul><li>IV crystalloid: <span class="drug">500ml Hartmann's bolus</span>, reassess, repeat as needed</li>
+<li>Catheterise — target urine output ≥0.5ml/kg/h</li>
+<li>STOP NSAIDs, ACEi/ARBs, diuretics temporarily</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Post-Renal — Relieve Obstruction</h4>
+<ul><li>Urinary retention: catheterise immediately. Monitor for post-obstructive diuresis.</li>
+<li>Ureteric obstruction: urology referral. USS / CT KUB.</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Indications for Emergency Dialysis (AEIOU)</h4>
+<p>A — Acidosis (pH &lt;7.1 refractory) | E — Electrolytes (K &gt;6.5 refractory) | I — Intoxication (dialysable toxins) | O — Overload (pulmonary oedema refractory) | U — Uraemia (pericarditis, encephalopathy) → Urgent nephrology referral</p></div></div>
+</div>
+</div>
+
+<!-- ELECTROLYTES -->
+<div id="p-electrolytes" class="hidden">
+<div class="ph"><h2>Electrolyte Disturbances</h2><div class="tags"><span class="tag t-o">IMPORTANT</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'el-na')">🧂 Sodium</div>
+  <div class="tb" onclick="tab(this,'el-k')">⚡ Potassium</div>
+  <div class="tb" onclick="tab(this,'el-ca')">🦴 Calcium</div>
+</div>
+<div id="el-na" class="tc active">
+<div class="card"><div class="ch"><h3>Hyponatraemia (Na &lt;135 mmol/L)</h3><button class="cpbtn" onclick="copyPF('pf-na')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-na">HYPONATRAEMIA ASSESSMENT
+=========================
+Na⁺: ___ mmol/L   Severity: mild (130-134) / moderate (125-129) / severe (&lt;125)
+Onset: acute (&lt;48h) / chronic (&gt;48h / unknown)
+
+SYMPTOMS:
+□ Mild: nausea, malaise, headache   □ Moderate: vomiting, drowsiness
+□ Severe: seizures, GCS &lt;8, respiratory arrest
+Symptomatic: Y/N   Seizure: Y/N
+
+CAUSE (assess volume status):
+HYPOVOLAEMIC: GI losses / diuretics / Addison's — Urine Na &lt;20
+EUVOLAEMIC: SIADH (SSRIs / chest disease / CNS / malignancy) / hypothyroid / polydipsia — Urine Na &gt;20
+HYPERVOLAEMIC: CCF / cirrhosis / nephrotic — Urine Na &lt;20
+
+SIADH (all required): Urine Osm &gt;100 / Urine Na &gt;20 / Euvolaemia / Serum Osm &lt;280 / No hypothyroid or Addison's
+
+MANAGEMENT:
+Severe symptomatic (seizures):
+→ 3% NaCl 150ml IV over 20 min — target Na rise 5mmol/L. Repeat × 2 if needed.
+
+Chronic / unknown onset:
+→ MAX correction: 8-10mmol/L per 24h (osmotic demyelination if too fast)
+→ SIADH: fluid restriction 500-1000ml/day
+→ Volume deplete: 0.9% NaCl
+→ Hypervolaemic: fluid restrict + diuretics
+Monitor Na q4-6h during active correction.
+</pre></div></div></div>
+
+<div id="el-k" class="tc">
+<div class="card"><div class="ch"><h3>Potassium Disturbances</h3><button class="cpbtn" onclick="copyPF('pf-k')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-k">HYPOKALAEMIA (K &lt;3.5 mmol/L)
+==============================
+K⁺: ___   Mg²⁺: ___ (correct Mg first — hypoMg causes refractory hypoK)
+Severity: mild 3.0-3.5 / moderate 2.5-3.0 / severe &lt;2.5
+ECG: flat T waves / prominent U wave / ST depression / prolonged QU
+
+CAUSES: vomiting / diarrhoea / diuretics / laxatives / Conn's / RTA / insulin / alkalosis
+
+TREATMENT:
+Oral (mild/PO tolerated): Sando-K 2 tablets TDS (each = 12mmol K)
+IV (severe / unable PO / ECG changes):
+  Peripheral: KCl 40mmol in 1L NaCl over 4h (max 10mmol/h peripheral)
+  Central: up to 20mmol/h with continuous monitoring
+Replace Mg first if low. Recheck K 2-4h post-replacement.
+
+HYPERKALAEMIA (K &gt;5.5 mmol/L)
+==============================
+K⁺: ___   Severity: mild 5.5-6.0 / moderate 6.0-6.5 / severe &gt;6.5
+ECG: peaked T waves / PR prolongation / QRS widening / sine wave / VF
+
+CAUSES: AKI / CKD / ACEi / NSAIDs / Addison's / haemolysis / rhabdomyolysis / DKA
+
+TREATMENT:
+1. Stabilise: Calcium gluconate 10% 30ml IV (cardiac membrane protection)
+2. Shift: Insulin-dextrose (10u + 50g glucose) + Salbutamol 10-20mg neb
+3. Remove: Calcium resonium / Patiromer (PO) or haemodialysis
+</pre></div></div></div>
+
+<div id="el-ca" class="tc">
+<div class="card"><div class="ch"><h3>Calcium Disturbances</h3><button class="cpbtn" onclick="copyPF('pf-ca')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-ca">HYPERCALCAEMIA (corrected Ca &gt;2.65 mmol/L)
+==========================================
+Corrected Ca = measured Ca + 0.02 × (40 - albumin)
+Corrected Ca: ___   Severity: mild &lt;3.0 / moderate 3.0-3.5 / severe &gt;3.5
+
+SYMPTOMS (Bones Stones Groans Moans Psychic Overtones):
+Bones: bone pain   Stones: renal calculi   Groans: nausea/vomiting/constipation
+Moans: fatigue/polyuria/polydipsia   Psychic: confusion/depression
+
+CAUSES: Primary hyperPTH (outpatient) / Malignancy (inpatient) / Sarcoid / Vit D excess
+PTH: ___   (elevated = primary hyperPTH; suppressed = malignancy or Vit D)
+
+TREATMENT:
+1. IV fluids: 0.9% NaCl 250-500ml/h — FIRST LINE (volume expansion + calciuresis)
+2. Bisphosphonates (once hydrated): Zoledronic acid 4mg IV over 15 min (onset 48-72h)
+3. Calcitonin 4-8 IU/kg SC q12h (rapid onset hours, but tachyphylaxis)
+4. Hydrocortisone 200mg IV (sarcoid / Vit D toxicity / haematological malignancy)
+5. Dialysis: life-threatening + renal failure
+
+HYPOCALCAEMIA (corrected Ca &lt;2.1 mmol/L)
+==========================================
+Symptoms: perioral tingling / tetany / Trousseau's / Chvostek's / seizures / prolonged QT
+TREATMENT (symptomatic / severe):
+→ Calcium gluconate 10% 20ml IV over 10-20 min, then infusion
+→ Calcium chloride 10% 10ml IV (cardiac arrest / central line only)
+Replace Mg if low.
+</pre></div></div></div>
+</div>
+
+<!-- ALCOHOL / WERNICKE -->
+<div id="p-alcohol" class="hidden">
+<div class="ph"><h2>Alcohol-Related Emergencies / Wernicke's</h2><div class="tags"><span class="tag t-r">HIGH ACUITY</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'al-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'al-mgmt')">💊 Management</div>
+</div>
+<div id="al-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-al')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-al">ALCOHOL-RELATED ASSESSMENT
+============================
+Daily intake: ___ units/day   Last drink: ___   Previous DTs: Y/N (HIGH RISK)
+Previous alcohol seizures: Y/N
+
+CIWA-Ar SCORE (treat if &gt;8):
+□ Nausea/vomiting / Tremor / Sweats / Anxiety / Agitation (0-7 each)
+□ Tactile / Auditory / Visual disturbances (0-7 each)
+□ Headache (0-7)   □ Orientation (0-4)
+CIWA-Ar Total: ___  [&lt;8=mild / 8-15=moderate / &gt;15=severe / &gt;20=DTs]
+
+WITHDRAWAL TIMELINE:
+6-12h: tremor, anxiety, nausea, tachycardia
+12-24h: hallucinations
+24-48h: seizures (peak)
+48-72h+: delirium tremens (confusion + autonomic instability)
+
+WERNICKE'S TRIAD (only 10-20% have all three):
+□ Confusion / encephalopathy   □ Ophthalmoplegia / nystagmus   □ Ataxia
+→ Any single feature in alcohol misuser = treat presumptively with Pabrinex
+
+EXAMINATION:
+GCS: ___/15   Nystagmus: Y/N   Ophthalmoplegia: Y/N   Ataxia: Y/N
+Jaundice: Y/N   Tremor: Y/N   Sweating: Y/N
+</pre></div></div>
+</div>
+<div id="al-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>ALWAYS give thiamine BEFORE glucose in alcohol misuse or malnutrition — glucose precipitates Wernicke's encephalopathy</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Wernicke's — Pabrinex</h4>
+<ul><li><span class="drug">Pabrinex IV High Potency: 2 pairs (500mg thiamine) in 100ml NaCl over 30 min TDS × 3 days</span></li>
+<li>Then <span class="drug">Pabrinex 1 pair (250mg) IV OD × 5 days</span></li>
+<li>Then oral <span class="drug">Thiamine 100mg TDS</span> maintenance</li>
+<li>Give BEFORE any dextrose-containing fluids</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Alcohol Withdrawal — Benzodiazepines</h4>
+<ul><li>CIWA-Ar guided: treat if score &gt;8</li>
+<li><span class="drug">Chlordiazepoxide PO</span> (preferred): CIWA 8-15: 25-50mg q2-4h prn | CIWA &gt;15: 50-100mg q1-2h prn</li>
+<li>Typical reducing regime: 30mg QDS day 1 → taper over 5-7 days</li>
+<li>Hepatic failure: <span class="drug">Lorazepam 1-2mg PO/IV</span> (no active metabolites)</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Delirium Tremens (CIWA &gt;20)</h4>
+<ul><li>ICU/HDU — mortality 5-15% if untreated</li>
+<li><span class="drug">Diazepam 10mg IV q5-10 min</span> until calm (symptom-guided — no ceiling)</li>
+<li>IV thiamine, IV fluids, electrolyte replacement (K, Mg, PO4)</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Alcohol Withdrawal Seizures</h4>
+<ul><li><span class="drug">Lorazepam 2-4mg IV</span> (treats seizure + withdrawal)</li>
+<li>Phenytoin NOT recommended for alcohol withdrawal seizures</li>
+<li>Ensure adequate thiamine replacement</li></ul></div></div>
+</div>
+</div>
+
+<!-- THYROID -->
+<div id="p-thyroid" class="hidden">
+<div class="ph"><h2>Thyroid Emergencies</h2><div class="tags"><span class="tag t-r">RARE BUT DANGEROUS</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'th-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'th-mgmt')">💊 Management</div>
+</div>
+<div id="th-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-th')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-th">THYROID EMERGENCY ASSESSMENT
+==============================
+BURCH-WARTOFSKY SCORE (treat if ≥45):
+Temp: 37.2-37.7=5 / 37.8-38.2=10 / 38.3-38.8=15 / 38.9-39.4=20 / ≥40=30: ___
+CNS: absent=0 / mild agitation=10 / moderate delirium=20 / seizure/coma=30: ___
+GI: absent=0 / N+V/diarrhoea=10 / jaundice=20: ___
+HR: &lt;90=0 / 90-109=5 / 110-119=10 / 120-129=15 / 130-139=20 / ≥140=25: ___
+CCF: absent=0 / mild oedema=5 / creps=10 / pulm oedema=15: ___
+AF: absent=0 / present=10: ___   Precipitant: absent=0 / present=10: ___
+BWS Total: ___ [&lt;25 unlikely / 25-44 impending / ≥45 storm]
+
+THYROID STORM: Hyperthermia / Marked tachycardia / AF / Agitation / Diaphoresis
+MYXOEDEMA COMA: Hypothermia / Bradycardia / Hypotension / Reduced GCS / Hypoventilation / Non-pitting oedema
+
+PMHx: known thyroid disease / Graves' / thyroidectomy / RAI
+Medications: carbimazole / PTU / levothyroxine — compliance: Y/N
+PRECIPITANT (storm): infection / surgery / contrast / MI / non-compliance / amiodarone
+
+TSH: ___   Free T4: ___   Free T3: ___   Cortisol: ___
+</pre></div></div>
+</div>
+<div id="th-mgmt" class="tc">
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Thyroid Storm — Treatment Sequence</h4>
+<ul><li>Block synthesis: <span class="drug">PTU 500-1000mg PO/NG stat, then 250mg q4h</span></li>
+<li>Block release (1h AFTER PTU): <span class="drug">Lugol's iodine 5-10 drops TDS PO</span></li>
+<li>Block peripheral effects: <span class="drug">Propranolol 60-80mg PO q4-6h</span> (esmolol IV if CCF)</li>
+<li>Block T4→T3 + adrenal support: <span class="drug">Hydrocortisone 100mg IV TDS</span></li>
+<li>Treat precipitant. Cool patient. ICU + urgent endocrinology.</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Myxoedema Coma</h4>
+<ul><li>Airway — intubate if GCS declining / hypoventilating</li>
+<li><span class="drug">Hydrocortisone 100mg IV TDS FIRST</span> (before thyroid hormone — exclude relative Addison's)</li>
+<li><span class="drug">IV Levothyroxine 300-500mcg IV bolus</span> then 50-100mcg OD IV</li>
+<li>Passive rewarming only (active rewarming → vasodilation → shock)</li>
+<li>Correct hyponatraemia slowly. ICU + urgent endocrinology.</li></ul></div></div>
+</div>
+</div>
+
+<!-- ENT -->
+<div id="p-ent" class="hidden">
+<div class="ph"><h2>ENT Emergencies</h2><div class="tags"><span class="tag t-o">TIME-SENSITIVE</span></div></div>
+<div class="tabs">
+  <div class="tb active" onclick="tab(this,'en-hist')">📋 History Proforma</div>
+  <div class="tb" onclick="tab(this,'en-mgmt')">💊 Management</div>
+</div>
+<div id="en-hist" class="tc active">
+<div class="card"><div class="ch"><h3>📋 History Template</h3><button class="cpbtn" onclick="copyPF('pf-en')">Copy</button></div>
+<div class="cb"><pre class="pf" id="pf-en">ENT EMERGENCY ASSESSMENT
+=========================
+Presentation: □ Epistaxis  □ Stridor/airway threat  □ Quinsy  □ Epiglottitis  □ Foreign body  □ Mastoiditis
+
+STRIDOR — UPPER AIRWAY THREAT:
+⚠️ Any stridor: senior airway help immediately — anaesthetics + ENT simultaneously
+Stridor: Y/N   Type: inspiratory / expiratory / biphasic (severe)
+Voice: normal / hoarse / muffled (hot potato voice = quinsy/epiglottitis)
+Drooling: Y/N   Dysphagia: Y/N   Tripod posture: Y/N
+SpO₂: ___%
+
+EPIGLOTTITIS (do NOT examine throat without airway support ready):
+□ Rapid onset sore throat + dysphagia + fever   □ Drooling   □ Tripod posture
+□ Muffled voice   □ Unable to swallow
+→ Sit upright. Do NOT lay flat. Senior airway team FIRST.
+
+QUINSY / PERITONSILLAR ABSCESS:
+□ Unilateral severe throat pain   □ Trismus (mouth opening: ___cm)
+□ Uvular deviation to contralateral side   □ Unilateral peritonsillar swelling
+□ Hot potato voice   □ Drooling   □ Fever
+
+EPISTAXIS:
+Side: L / R / bilateral   Anterior / posterior (blood into pharynx)
+Amount: minor / moderate / major   Active: Y/N
+Anticoagulants / antiplatelets: Y/N — which: ___   Last dose: ___
+BP: ___/___ (hypertension precipitant)
+Site: Little's area (anterior septum — commonest) / posterior
+
+PMHx: bleeding disorder / coagulopathy / hypertension
+Medications: warfarin / DOACs / aspirin / clopidogrel
+</pre></div></div>
+</div>
+<div id="en-mgmt" class="tc">
+<div class="alert a-r">🚨 <strong>Stridor + inability to manage secretions = Airway Emergency — call anaesthetics + ENT simultaneously. Do not leave patient alone.</strong></div>
+<div class="mstep"><div class="sn">1</div><div class="sc"><h4>Epiglottitis</h4>
+<ul><li>Sit upright. Do NOT examine throat. Do NOT lay flat. Alert anaesthetics + ENT immediately.</li>
+<li>Humidified O₂. IV access calmly. <span class="drug">Dexamethasone 8mg IV</span>.</li>
+<li><span class="drug">Ceftriaxone 2g IV</span> (H. influenzae + streptococcal cover)</li>
+<li>Definitive airway in controlled setting (theatre if possible)</li></ul></div></div>
+<div class="mstep"><div class="sn">2</div><div class="sc"><h4>Quinsy (Peritonsillar Abscess)</h4>
+<ul><li>ENT referral for aspiration or incision + drainage</li>
+<li><span class="drug">Benzylpenicillin 1.2g IV QDS</span> + <span class="drug">Metronidazole 500mg IV TDS</span></li>
+<li><span class="drug">Dexamethasone 8-10mg IV</span> (reduces oedema)</li>
+<li>IV fluids if unable to swallow. Analgesia.</li></ul></div></div>
+<div class="mstep"><div class="sn">3</div><div class="sc"><h4>Epistaxis</h4>
+<ul><li>Lean forward, pinch soft part of nose continuously 15-20 min</li>
+<li>Anterior (Little's area): <span class="drug">Lidocaine + adrenaline spray</span> then silver nitrate cautery (one side per episode)</li>
+<li>If uncontrolled: Nasopore / Rapid Rhino anterior nasal pack</li>
+<li>Posterior bleed / failed pack: ENT. Posterior balloon (Foley 12-14Fr).</li>
+<li>Anticoagulation reversal only if life-threatening — discuss haematology</li></ul></div></div>
+<div class="mstep"><div class="sn">4</div><div class="sc"><h4>Ludwig's Angina</h4>
+<ul><li>Airway EMERGENCY — senior anaesthetics + ENT immediately</li>
+<li><span class="drug">Co-amoxiclav 1.2g IV TDS</span> + <span class="drug">Metronidazole 500mg IV TDS</span></li>
+<li>Early surgical drainage. Awake fibreoptic intubation if airway compromised. ICU.</li></ul></div></div>
+</div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end layout -->
+
+<script>
+const panels = {
+  syncope:'p-syncope', ams:'p-ams', headache:'p-headache', headtrauma:'p-headtrauma',
+  seizures:'p-seizures', sob:'p-sob', chestpain:'p-chestpain', abdo:'p-abdo',
+  pelvic:'p-pelvic', backpain:'p-backpain', pvb:'p-pvb', redeye:'p-redeye',
+  joints:'p-joints', anaphylaxis:'p-anaphylaxis', asthma:'p-asthma', copd:'p-copd',
+  acs:'p-acs', chf:'p-chf', dvtpe:'p-dvtpe', stroke:'p-stroke',
+  dka:'p-dka', sepsis:'p-sepsis', gibleed:'p-gibleed',
+  toxicology:'p-toxicology', psych:'p-psych', paedfever:'p-paedfever',
+  aki:'p-aki', electrolytes:'p-electrolytes', alcohol:'p-alcohol',
+  thyroid:'p-thyroid', ent:'p-ent'
+};
+
+let current = null;
+
+function show(key) {
+  if (current) {
+    const old = document.getElementById(panels[current]);
+    if (old) old.classList.add('hidden');
+    document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  }
+  const panel = document.getElementById(panels[key]);
+  if (panel) panel.classList.remove('hidden');
+  document.querySelectorAll('.ni').forEach(n => {
+    if (n.getAttribute('onclick') === "show('" + key + "')") n.classList.add('active');
+  });
+  current = key;
+  document.getElementById('main').scrollTop = 0;
+}
+
+function tab(el, targetId) {
+  const container = el.parentElement;
+  container.querySelectorAll('.tb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const panel = el.closest('[id^="p-"]');
+  if (panel) {
+    panel.querySelectorAll('.tc').forEach(t => t.classList.remove('active'));
+    const target = document.getElementById(targetId);
+    if (target) target.classList.add('active');
+  }
+}
+
+function copyPF(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.innerText || el.textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => flash(id));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    flash(id);
+  }
+}
+
+function flash(id) {
+  document.querySelectorAll('.cpbtn').forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) {
+      b.textContent = 'Copied!';
+      b.classList.add('copied');
+      setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('copied'); }, 2000);
+    }
+  });
+}
+
+function filterNav(val) {
+  const v = val.toLowerCase();
+  document.querySelectorAll('.ni').forEach(n => {
+    n.style.display = n.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
