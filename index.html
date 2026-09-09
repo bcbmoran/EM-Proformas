@@ -148,7 +148,7 @@ table.st tr:nth-child(even) td{background:#f8fafb;}
       <option value="drugopioids">Opioids</option><option value="drugnmb">Neuromuscular Blockade</option>
       <option value="drugreversal">Reversal Agents</option><option value="drugantiemetics">Antiemetics</option>
       <option value="drugvasopressors">Vasopressors</option><option value="drugantimuscarinics">Antimuscarinics</option>
-      <option value="druglocal">Local Anaesthetics</option><option value="drugfluids">IV Fluids</option>
+      <option value="druglocal">Local Anaesthetics</option><option value="drugfluids">IV Fluids</option></optgroup><optgroup label="Physiology &amp; Pharmacology Reference"><option value="ans">Autonomic NS (Sympathetic/Parasympathetic)</option>
     </optgroup>
   </select>
 </div>
@@ -201,7 +201,7 @@ table.st tr:nth-child(even) td{background:#f8fafb;}
     <div class="ni" onclick="show('drugvasopressors')"><span class="dot db"></span>Vasopressors</div>
     <div class="ni" onclick="show('drugantimuscarinics')"><span class="dot db"></span>Antimuscarinics</div>
     <div class="ni" onclick="show('druglocal')"><span class="dot db"></span>Local Anaesthetics</div>
-    <div class="ni" onclick="show('drugfluids')"><span class="dot db"></span>IV Fluids</div>
+    <div class="ni" onclick="show('drugfluids')"><span class="dot db"></span>IV Fluids</div><div class="nc">Physiology &amp; Pharmacology Reference</div><div class="ni" onclick="show('ans')"><span class="dot dg"></span>Autonomic NS (Sympathetic/Parasympathetic)</div>
   </div>
 </div>
 
@@ -4064,7 +4064,7 @@ const panels = {
     drugopioids:'p-drugopioids', drugnmb:'p-drugnmb',
     drugreversal:'p-drugreversal', drugantiemetics:'p-drugantiemetics',
     drugvasopressors:'p-drugvasopressors', drugantimuscarinics:'p-drugantimuscarinics',
-    druglocal:'p-druglocal', drugfluids:'p-drugfluids'
+    druglocal:'p-druglocal', drugfluids:'p-drugfluids', ans:'p-ans'
 };
 
 function show(key) {
